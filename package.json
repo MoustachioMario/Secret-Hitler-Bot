@@ -1,0 +1,11 @@
+{
+  "name": "coup bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "author": "",
+  "dependencies": {
+    "discord.js": "11.1.0",
+    "request": "2.81.0"},
+  "scripts" : {"start": "node bot.js"}
+}
