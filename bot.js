@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-const { Database } = require('pg');
+/*const { Database } = require('pg');
 
 const database = new Database({
   connectionString: process.env.DATABASE_URL,
@@ -18,7 +18,7 @@ database.query('SELECT table_schema,table_name FROM information_schema.tables;',
   }
   database.end();
 });
-
+*/
 const client = new Discord.Client();
 
 const prefix = '/';
