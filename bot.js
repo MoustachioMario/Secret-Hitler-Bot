@@ -1,24 +1,7 @@
 const Discord = require('discord.js');
 
-/*const { Database } = require('pg');
+const request = require('sync-request');
 
-const database = new Database({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-
-database.connect();
-
-database.query('SELECT table_schema,table_name FROM information_schema.tables;', (err, res) => {
-  if (err) throw err;
-  for (let row of res.rows) {
-    console.log(JSON.stringify(row));
-  }
-  database.end();
-});
-*/
 const client = new Discord.Client();
 
 const prefix = '/';
