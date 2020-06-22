@@ -897,7 +897,7 @@ function patchEvent(query = null, newValue = null){
     return
   }
   else {
-    var patchEvent = request('PATCH', process.env.EVENTURL + '/' + query, {
+    var patchEvent = request('PATCH', process.env.DB_URL + '/' + query, {
       headers: DBHeader,
       body : '{"testtest":"'+newValue+'"}'
     });
@@ -908,12 +908,12 @@ function patchEvent(query = null, newValue = null){
 
 function getEvent(query = null){
   if (query == null){
-    var getEvent = request('GET', process.env.EVENTURL, {
+    var getEvent = request('GET', process.env.DB_URL, {
       headers: DBHeader
     });
   }
   else {
-    var getEvent = request('GET', process.env.EVENTURL + '?q=' + query, {
+    var getEvent = request('GET', process.env.DB_URL + '?q=' + query, {
       headers: DBHeader
     });
   }
