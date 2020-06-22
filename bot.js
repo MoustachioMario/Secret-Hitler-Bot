@@ -896,7 +896,7 @@ function endGame(channel){
 function breakBot(channel){
   Game.signups[10000][1].players;
 }
-
+/*
 function patchEvent(query = null, newValue = null){
   if (query == null){
     return
@@ -932,3 +932,4 @@ function getEvent(query = null){
     testtest = JSON.parse(responseBody)[0].testtest;
     return gameID + "\n" + testtest
 }
+*/
