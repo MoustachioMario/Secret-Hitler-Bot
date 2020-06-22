@@ -11,8 +11,16 @@ let prefix = false;
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
-    if (command == "ping"){
-        message.channel.send("pongalongadingdong V1")
+    try {
+        if (command == "ping"){
+            message.channel.send("pongalongadingdong V1")
+        }
+        else if (command == "break"){
+            throw Error;
+        }
+    }
+    catch (error) {
+        client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
     }
 });
     //try{
