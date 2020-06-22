@@ -19,7 +19,7 @@ let prefix = false;
             message.channel.send("pongalongadingdong V2")
         }
         else if (command == "get"){
-            message.channel.send(getEvent());
+            message.channel.send(getEvent(args[0]));
         }
     }
     catch (error) {
@@ -918,7 +918,6 @@ function getEvent(query = null){
     });
   }
   var responseBody = Buffer.from(getEvent.body).toString();
-    gameID = JSON.parse(responseBody)[0]._id;
-    testtest = JSON.parse(responseBody)[0].testtest;
-    return gameID + "\n" + testtest
+    var gameID = JSON.parse(responseBody)[0]._id;
+    return gameID + "\n"
 }
