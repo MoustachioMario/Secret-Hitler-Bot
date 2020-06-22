@@ -16,7 +16,7 @@ let prefix = false;
             message.channel.send("pongalongadingdong V1")
         }
         else if (command == "break"){
-            throw Error;
+            message.channel.send(args[0])
         }
     }
     catch (error) {
