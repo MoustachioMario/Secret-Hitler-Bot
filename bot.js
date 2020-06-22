@@ -14,11 +14,11 @@ let prefix = false;
         message.channel.send("pongalongadingdong")
     }
     try{
-    var channelIndex = isChannelOpen(message.channel.id)
-    if (channelIndex != -1){
-      var signup = Game.signups[channelIndex][0];
-      var gameInfo = Game.signups[channelIndex][1];
-    }
+    //var channelIndex = isChannelOpen(message.channel.id)
+    //if (channelIndex != -1){
+      //var signup = Game.signups[channelIndex][0];
+      //var gameInfo = Game.signups[channelIndex][1];
+    //}
     if (prefix == '/'){
       if (command == "nominate"){
         for (var i in gameInfo.players){
@@ -424,9 +424,9 @@ let prefix = false;
     //save();
   }
   catch (err) {
-    message.channel.send("**ERROR**: " + err + "\nMoustachioMario has been notified.")
+    //message.channel.send("**ERROR**: " + err + "\nMoustachioMario has been notified.")
     client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
-  }*/
+  }
 });
 
 client.login(process.env.TOKEN);
