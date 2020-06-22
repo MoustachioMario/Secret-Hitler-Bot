@@ -307,13 +307,13 @@ client.on('message', message => {
       if (!requiredRoles(message)){
         return;
       }
-      /*
+      //COMMENT THIS OUT
       else if (channelIndex != -1){
         for (i in Game.signups[channelIndex][0][2]){
           message.guild.members.get(Game.signups[channelIndex][0][2][i]).addRole(message.guild.roles.get('671874921898442762'));
         }
         message.channel.send("Players now have the [Alive Line Special] role!")
-      }*/
+      }
       if (Game.signups[channelIndex][0][2].length < 5){
         return message.channel.send("**ERROR** Too Few Players")
       }
