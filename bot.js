@@ -11,7 +11,7 @@ let prefix = false;
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
     if (command == "ping"){
-        message.channel.send("pongalongadingdong")
+        message.channel.send("pongalongadingdong V1
     }
     try{
     //var channelIndex = isChannelOpen(message.channel.id)
@@ -19,6 +19,7 @@ let prefix = false;
       //var signup = Game.signups[channelIndex][0];
       //var gameInfo = Game.signups[channelIndex][1];
     //}
+    /*
     if (prefix == '/'){
       if (command == "nominate"){
         for (var i in gameInfo.players){
@@ -168,6 +169,7 @@ let prefix = false;
         }
       }
     }
+    */
     if (prefix != "sh."){}
     else if (command == "help"){
       var embed = new Discord.MessageEmbed();
@@ -188,6 +190,7 @@ let prefix = false;
       embed.setFooter("Made by MoustachioMario#2067")
       message.channel.send(embed)
     }
+        /*
     else if (command == "break"){
       if (message.author.id == '642172417417936925'){
         Game.signups[10000000][1]
@@ -216,6 +219,7 @@ let prefix = false;
       }
       Game.trustedRoles.push(new Server(message.guild.id, args[0]))
     }
+    */
     else if (command == "donate"){
       message.channel.send("Please Consider Donating!\nhttps://www.patreon.com/MoustachioMario")
     }
@@ -224,11 +228,9 @@ let prefix = false;
             client.user.setStatus('dnd');
             setTimeout(function() {client.users.members.id},1000)
     }
+        /*
     else if (message.guild === null){
       message.author.send(pendingVotes(message.author.id))
-    }
-    else if (command == "ping"){
-      message.channel.send("pong")
     }
     else if (command == "signups"){
       if (!requiredRoles(message)){
@@ -422,6 +424,7 @@ let prefix = false;
       //}
     }
     //save();
+    */
   }
   catch (err) {
     //message.channel.send("**ERROR**: " + err + "\nMoustachioMario has been notified.")
