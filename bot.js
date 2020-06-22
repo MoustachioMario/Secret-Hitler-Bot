@@ -11,7 +11,7 @@ let prefix = false;
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
     if (command == "ping"){
-        message.channel.send("pongalongadingdong V1
+        message.channel.send("pongalongadingdong V1")
     }
 });
     //try{
