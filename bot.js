@@ -434,7 +434,7 @@ let prefix = false;
 
 client.login(process.env.TOKEN);
 
-
+/*
 function isChannelOpen(channel){
   for (var i in Game.signups){
     if (channel == Game.signups[i][0][0]){
@@ -920,5 +920,4 @@ function getEvent(query = null){
     return gameID + "\n" + testtest
     }
 });
-
-client.login(process.env.TOKEN);
+*/
