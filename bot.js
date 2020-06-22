@@ -5,7 +5,6 @@ const request = require('sync-request')
 
 client.on('ready', () => {
     try {
-      load();
     } catch (err) {}
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setStatus('online')
@@ -226,8 +225,8 @@ client.on('message', message => {
       for (var i in Game.trustedRoles){
         if (Game.trustedRoles[i].id == message.guild.id){
           message.channel.send("Added")
-          Game.trustedRoles[i].trustedRoles.push(args[0])
-          return save();
+          return Game.trustedRoles[i].trustedRoles.push(args[0])
+          //return save();
         }
       }
       Game.trustedRoles.push(new Server(message.guild.id, args[0]))
@@ -437,7 +436,7 @@ client.on('message', message => {
         //shuffleDeck(channelIndex);
       //}
     }
-    save();
+    //save();
   }
   catch (err) {
     message.channel.send("**ERROR**: " + err + "\nMoustachioMario has been notified.")
