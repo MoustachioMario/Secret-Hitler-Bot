@@ -13,6 +13,7 @@ let prefix = false;
     if (command == "ping"){
         message.channel.send("pongalongadingdong V1
     }
+});
     //try{
     //var channelIndex = isChannelOpen(message.channel.id)
     //if (channelIndex != -1){
@@ -420,14 +421,13 @@ let prefix = false;
       //}
     }
     //save();
-    */
   }
   catch (err) {
     //message.channel.send("**ERROR**: " + err + "\nMoustachioMario has been notified.")
     client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
   }
 });
-
+*/
 client.login(process.env.TOKEN);
 
 /*
