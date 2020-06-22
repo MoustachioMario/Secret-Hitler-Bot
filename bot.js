@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const request = require('sync-request')
 
 const prefixes = ["sh.","/"]
 
@@ -16,7 +17,7 @@ let prefix = false;
             message.channel.send("pongalongadingdong V1")
         }
         else if (command == "break"){
-            message.channel.send(args[0])
+            throw "You have broke the bot!"
         }
     }
     catch (error) {
@@ -888,7 +889,7 @@ function endGame(channel){
 function breakBot(channel){
   Game.signups[10000][1].players;
 }
-/*
+*/
 function patchEvent(query = null, newValue = null){
   if (query == null){
     return
@@ -925,4 +926,3 @@ function getEvent(query = null){
     return gameID + "\n" + testtest
     }
 });
-*/
