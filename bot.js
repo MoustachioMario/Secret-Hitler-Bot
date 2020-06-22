@@ -918,5 +918,4 @@ function getEvent(query = null){
     gameID = JSON.parse(responseBody)[0]._id;
     testtest = JSON.parse(responseBody)[0].testtest;
     return gameID + "\n" + testtest
-    }
-});
+}
