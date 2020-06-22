@@ -1,16 +1,7 @@
-const fs = require("fs");
-const http = require("http");
-const express = require('express');
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => res.send('You have found MoustachioMario\'s Coup Bot! Join this server: https://discord.gg/qrHrybV! DM me on Discord: MoustachioMario#2067'));
-
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
-
 // ================= START BOT CODE ===================
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const request = require('sync-request')
 
 client.on('ready', () => {
     try {
@@ -904,4 +895,40 @@ function endGame(channel){
 
 function breakBot(channel){
   Game.signups[10000][1].players;
+}
+
+function patchEvent(query = null, newValue = null){
+  if (query == null){
+    return
+  }
+  else {
+    console.log("HI")
+    var update =  {"testtest":newValue}
+    var patchEvent = request('PATCH', process.env.EVENTURL + '/' + query, {
+      headers: DBHeader,
+      body : '{"testtest":"'+newValue+'"}'
+    });
+    var responseBody = Buffer.from(patchEvent.body).toString();
+    console.log(responseBody)
+  }
+}
+
+function getEvent(query = null){
+  console.log("Start")
+  if (query == null){
+    var getEvent = request('GET', process.env.EVENTURL, {
+      headers: DBHeader
+    });
+  }
+  else {
+    var getEvent = request('GET', process.env.EVENTURL + '?q=' + query, {
+      headers: DBHeader
+    });
+  }
+  var responseBody = Buffer.from(getEvent.body).toString();
+  console.log(responseBody)
+  db = responseBody;
+    gameID = JSON.parse(responseBody)[0]._id;
+    testtest = JSON.parse(responseBody)[0].testtest;
+    return gameID + "\n" + testtest
 }
