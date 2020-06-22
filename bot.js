@@ -27,9 +27,12 @@ client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
-    Game.logs.unshift(command)
-    try{
-    var channelIndex = isChannelOpen(message.channel.id)
+    if (command == "ping"){
+        message.channel.send("pong")
+    }
+    //try{
+    //var channelIndex = isChannelOpen(message.channel.id)
+    /*
     if (channelIndex != -1){
       var signup = Game.signups[channelIndex][0];
       var gameInfo = Game.signups[channelIndex][1];
@@ -441,7 +444,7 @@ client.on('message', message => {
   catch (err) {
     message.channel.send("**ERROR**: " + err + "\nMoustachioMario has been notified.")
     client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
-  }
+  }*/
 });
 
 client.login(process.env.TOKEN);
