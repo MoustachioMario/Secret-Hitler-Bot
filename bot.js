@@ -18,6 +18,9 @@ let prefix = false;
         if (command == "ping"){
             message.channel.send("pongalongadingdong V2")
         }
+        else if (command == "get"){
+            message.channel.send(getEvent());
+        }
     }
     catch (error) {
         client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
