@@ -22,7 +22,7 @@ let prefix = false;
             message.channel.send(getEvent(args[0]));
         }
         else if (command == "patch"){
-            patchEvent(args[0], args[1]);
+            patchEvent(args[0], args[1], args[2]);
             message.channel.send("Done!")
         }
     }
