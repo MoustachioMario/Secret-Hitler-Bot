@@ -4,7 +4,7 @@ const client = new Discord.Client();
 
 client.on('message', message => {
     if (message.content == "/ping"){
-        message.channel.send("pong");
+        message.channel.send("pongalongadingdong");
     }
 });
 
