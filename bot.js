@@ -6,6 +6,12 @@ const prefixes = ["sh.","/"]
 
 var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.APIKEY }
 
+client.on('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`);
+    client.user.setStatus('online')
+    client.users.cache.get('642172417417936925').send("I have been updated.);
+});
+
 client.on('message', message => {
 let prefix = false;
     for(const thisPrefix of prefixes) {
