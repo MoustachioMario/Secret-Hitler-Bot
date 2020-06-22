@@ -4,7 +4,7 @@ const request = require('sync-request')
 
 const prefixes = ["sh.","/"]
 
-const DBHeader = "hi";
+var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.APIKEY }
 
 client.on('message', message => {
 let prefix = false;
