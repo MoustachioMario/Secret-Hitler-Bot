@@ -21,6 +21,10 @@ let prefix = false;
         else if (command == "get"){
             message.channel.send(getEvent(args[0]));
         }
+        else if (command == "patch"){
+            patchEvent(args[0], args[1]);
+            message.channel.send("Done!")
+        }
     }
     catch (error) {
         client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
@@ -892,14 +896,14 @@ function breakBot(channel){
   Game.signups[10000][1].players;
 }
 */
-function patchEvent(query = null, newValue = null){
+function patchEvent(query = null,col=null, newValue = null){
   if (query == null){
     return
   }
   else {
     var patchEvent = request('PATCH', process.env.DB_URL + '/' + query, {
       headers: DBHeader,
-      body : '{"testtest":"'+newValue+'"}'
+      body : '{"'+col+'":"'+newValue+'"}'
     });
     var responseBody = Buffer.from(patchEvent.body).toString();
     console.log(responseBody)
@@ -919,5 +923,5 @@ function getEvent(query = null){
   }
   var responseBody = Buffer.from(getEvent.body).toString();
     var gameID = JSON.parse(responseBody)[0]._id;
-    return gameID + "\n"
+    return responseBody;
 }
