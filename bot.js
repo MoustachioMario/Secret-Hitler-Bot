@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+const prefixes = ["sh.","/"]
 
 client.on('message', message => {
 let prefix = false;
