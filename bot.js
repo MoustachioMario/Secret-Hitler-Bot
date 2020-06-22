@@ -4,6 +4,8 @@ const request = require('sync-request')
 
 const prefixes = ["sh.","/"]
 
+const DBHeader = "hi";
+
 client.on('message', message => {
 let prefix = false;
     for(const thisPrefix of prefixes) {
@@ -14,10 +16,7 @@ let prefix = false;
     const command = args.shift().toLowerCase();
     try {
         if (command == "ping"){
-            message.channel.send("pongalongadingdong V1")
-        }
-        else if (command == "break"){
-            throw "You have broke the bot!"
+            message.channel.send("pongalongadingdong V2")
         }
     }
     catch (error) {
@@ -895,8 +894,6 @@ function patchEvent(query = null, newValue = null){
     return
   }
   else {
-    console.log("HI")
-    var update =  {"testtest":newValue}
     var patchEvent = request('PATCH', process.env.EVENTURL + '/' + query, {
       headers: DBHeader,
       body : '{"testtest":"'+newValue+'"}'
@@ -907,7 +904,6 @@ function patchEvent(query = null, newValue = null){
 }
 
 function getEvent(query = null){
-  console.log("Start")
   if (query == null){
     var getEvent = request('GET', process.env.EVENTURL, {
       headers: DBHeader
@@ -919,8 +915,6 @@ function getEvent(query = null){
     });
   }
   var responseBody = Buffer.from(getEvent.body).toString();
-  console.log(responseBody)
-  db = responseBody;
     gameID = JSON.parse(responseBody)[0]._id;
     testtest = JSON.parse(responseBody)[0].testtest;
     return gameID + "\n" + testtest
