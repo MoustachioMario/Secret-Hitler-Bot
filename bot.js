@@ -268,6 +268,7 @@ client.on('message', message => {
     catch (error){
       message.channel.send("**An Error has occured!** MoustachioMario is already aware and will be fixing it asap!")
       //client.users.cache.get("642172417417936925").send("**ERROR**: " + error.stack)
+        console.log(error.stack)
     }
 });
 function everyoneVoted(channel){
