@@ -341,7 +341,7 @@ function pendingVotes(player){
   for (var i in Game){
       console.log(i)
      if (Game[i].votes[player] == "Maybe"){
-       embed.addField("Game " + i, "You need to vote Ja or Nein.") //for:\nPresident " + client.users.cache.get(Game[i].office["President"]).tag + "\nChancellor " + client.users.cache.get(Game[i].office["Chancellor"]).tag)
+       embed.addField("Game " + i, "You need to vote Ja or Nein for:\nPresident " + client.users.cache.get(Game[i].office["President"]).tag + "\nChancellor " + client.users.cache.get(Game[i].office["Chancellor"]).tag)
      }
      else if (Game[i].office["President"] == player && Game[i].policy["InOffice"].length == 3){
        embed.addField("Game " + i, "You need to discard a card:\n1: "+Game[i].policy["InOffice"][0]+"\n2: "+Game[i].policy["InOffice"][1]+"\n3: "+Game[i].policy["InOffice"][2])
