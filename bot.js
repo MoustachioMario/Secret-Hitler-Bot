@@ -54,14 +54,13 @@ client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
-   // try{
+    try{
       if (command == "ping"){
         message.channel.send("pong")
       }
       else if (command == "pong"){
         message.channel.send("sh.ping")
       }
-       /*
       else if (command == "in"){
         var open = gameFromChannel(message.channel.id)
         if (open == null){
@@ -76,8 +75,6 @@ client.on('message', message => {
           updateDB(Game[open].id, JSON.stringify({"Alive":Game[open].alive}))
         }
       }
-      */
-        /*
       else if (command == "out"){
         var open = gameFromChannel(message.channel.id)
         if (open == null)message.channel.send("There is no open game here :/")
@@ -91,7 +88,6 @@ client.on('message', message => {
         }
         updateDB(Game[open].id, JSON.stringify({"Alive":Game[open].alive}))
       }
-      *//*
       else if (command == "print"){
         var open = gameFromChannel(message.channel.id)
         message.channel.send("Working " + open)
@@ -103,12 +99,10 @@ client.on('message', message => {
           message.channel.send(Game[open].alive)
         }
       }
-      *//*
       else if (command == "create"){
         createGame(message.channel.id)
         message.channel.send("These signups are now open!")
       }
-      *//*
       else if (command == "president"){
         var open = gameFromChannel(message.channel.id)
         message.channel.send("Working " + open)
@@ -122,7 +116,6 @@ client.on('message', message => {
           }
           updateDB(Game[open].id, JSON.stringify({"Office":Game[open].office}))
       }
-      *//*
       else if (command == "nominate"){
         var chance = message.mentions.users.first().id;
         var open = gameFromChannel(message.channel.id)
@@ -139,7 +132,6 @@ client.on('message', message => {
         Game[open].status = "Voting"
         updateDB(Game[open].id, JSON.stringify({"Office":Game[open].office,"Votes":Game[open].votes,"ActionDone":Game[open].status}))
       }
-      *//*
       else if (command == "shoot" || command == "execute"){
         var open = gameFromChannel(message.channel.id)
         if (Game[open].status != "Execution") return message.channel.send("There are no scheduled executions at this moment.")
@@ -158,7 +150,6 @@ client.on('message', message => {
         message.channel.send("They were not hitler.")
         nextRound(open);
       }
-      *//*
       else if (command == "investigate" || command == "inv"){
         var open = gameFromChannel(message.channel.id)
         if (Game[open].status != "Investigation") return message.channel.send("There are no scheduled investigations at this moment.")
@@ -180,18 +171,16 @@ client.on('message', message => {
         client.users.cache.get(Game[open].office["President"]).send(client.users.cache.get(message.mentions.members.first().id).tag + "\'s party membership is aligned with the " + membership)
         nextRound(open);
       }
-      *//*
+    
       else if (command == "start"){
         setUpGame(message)
       }
-      *//*
       //----------------------------------------YOU MUST DM PAST THIS POINT---------------------------------------
       else if (message.guild != null){
         if (command == "vote" || command == "discard"){
           return message.reply("those commands can only be done in DMs!")
         }
       }
-      *//*
       else if (command == "vote"){
         try {
           console.log(Game[args[0]].status)
@@ -217,7 +206,6 @@ client.on('message', message => {
         updateDB(Game[args[0]].id, JSON.stringify({"Votes":Game[args[0]].votes}))
         everyoneVoted(args[0])
       }
-      *//*
       else if (command == "discard"){
           if (Game[args[0]].policy["InOffice"].length == 3 && Game[args[0]].office["President"] != message.author.id){
             return message.channel.send("YOU ARE NOT PRESIDENT");
@@ -273,9 +261,7 @@ client.on('message', message => {
       message.channel.send("**An Error has occured!** MoustachioMario is already aware and will be fixing it asap!")
       client.users.cache.get("642172417417936925").send("**ERROR**: " + error.stack)
     }
-    */
 });
-/*
 function everyoneVoted(channel){
   var ja = 0;
   var nein = 0;
@@ -371,8 +357,7 @@ function shuffleDeck(channel){
     client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Deck Reshuffled").addField("Liberal Policies Remaining",libCards).addField("Fascist Policies Remaining",fasCards))
     updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy}))
 }
-    */
-/*
+
 function passedFascist(channelIndex, topDeck = false){
   Game[channelIndex].passed["Fascist"]++;
   var fas = Game[channelIndex].passed["Fascist"];
@@ -449,8 +434,6 @@ function printVote(channel){
   }
   return embed;
 }
-*/
-/*
 function setUpGame(message){
   //[ID | Role | Alignment | Termlocked | President/Chancellor | Ja/Nien/Maybe]
   //------------------------------------------------------SETTING UP-----------------------------------------------------------
@@ -534,7 +517,7 @@ function setUpGame(message){
   console.log(gameInfo.roles) // <-- i don't need office xd i need roles office works
   updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
 }
-*/
+
 function endGame(channel){
   console.log("present")
   var embed = new Discord.MessageEmbed()
