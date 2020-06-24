@@ -562,7 +562,7 @@ function gameFromChannel(channelID){
 client.login(process.env.TOKEN)
 
 
-var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.KEY }
+var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.APIKEY }
 
 var info = getEvent();
 
