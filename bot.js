@@ -329,8 +329,11 @@ function everyoneVoted(channel){
 }
 
 function pendingVotes(player){
+    console.log("GATE TWO")
   var embed = new Discord.MessageEmbed().setTitle("Pending Actions");
-  for (var i in Game){  
+    console.log("GATE ONE")
+  for (var i in Game){
+      console.log(i)
      if (Game[i].votes[player] == "Maybe"){
        embed.addField("Game " + i, "You need to vote Ja or Nein.") //for:\nPresident " + client.users.cache.get(Game[i].office["President"]).tag + "\nChancellor " + client.users.cache.get(Game[i].office["Chancellor"]).tag)
      }
