@@ -275,7 +275,7 @@ client.on('message', message => {
     }
     */
 });
-
+/*
 function everyoneVoted(channel){
   var ja = 0;
   var nein = 0;
@@ -371,7 +371,8 @@ function shuffleDeck(channel){
     client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Deck Reshuffled").addField("Liberal Policies Remaining",libCards).addField("Fascist Policies Remaining",fasCards))
     updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy}))
 }
-
+    */
+/*
 function passedFascist(channelIndex, topDeck = false){
   Game[channelIndex].passed["Fascist"]++;
   var fas = Game[channelIndex].passed["Fascist"];
@@ -448,7 +449,8 @@ function printVote(channel){
   }
   return embed;
 }
-
+*/
+/*
 function setUpGame(message){
   //[ID | Role | Alignment | Termlocked | President/Chancellor | Ja/Nien/Maybe]
   //------------------------------------------------------SETTING UP-----------------------------------------------------------
@@ -532,7 +534,7 @@ function setUpGame(message){
   console.log(gameInfo.roles) // <-- i don't need office xd i need roles office works
   updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
 }
-
+*/
 function endGame(channel){
   console.log("present")
   var embed = new Discord.MessageEmbed()
