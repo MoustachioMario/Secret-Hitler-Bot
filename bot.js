@@ -116,6 +116,8 @@ client.on('message', message => {
           }
       }
       else if (command == "votecount" || command == "vc"){
+        var channelIndex = gameFromChannel(message.channel.id);
+        if (channelIndex == null) return message.channel.send("There is no game in this channel.")
         var mess = "```\n"
         for (var i in Game[channelIndex].votes){
             if (Game[channelIndex].votes[i] == "Maybe"){
