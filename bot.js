@@ -233,7 +233,7 @@ client.on('message', message => {
           vote = "nein"
         }
         else {
-          vote = "maybe"
+          vote = "Maybe"
         }
         Game[args[0]].votes[message.author.id] = vote
         message.channel.send("You have voted " + vote + "!")
