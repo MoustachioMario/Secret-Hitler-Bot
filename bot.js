@@ -61,6 +61,9 @@ client.on('message', message => {
       else if (command == "pong"){
         message.channel.send("sh.ping")
       }
+      else if (command == "info"){
+          message.channel.send(pendingVotes(message.author.id))
+      }
       else if (command == "in"){
         var open = gameFromChannel(message.channel.id)
         if (open == null){
@@ -316,6 +319,22 @@ function everyoneVoted(channel){
       nextRound(channel)
     }
   }
+}
+
+function pendingVotes(player){
+  var embed = new Discord.MessageEmbed().setTitle("Pending Actions");
+  for (var i in Game){  
+     if (Game[i].votes[player] == "Maybe"){
+       embed.addField("Game " + i, "You need to vote Ja or Nein for:\nPresident " + client.users.cache.get(Game[i].office["President"]).tag + "\nChancellor " + client.users.cache.get(Game[i].office["Chancellor"]).tag)
+     }
+     else if (Game[i].office["President"] == player && Game[i].policy["InOffice"].length == 3){
+       embed.addField("Game " + i, "You need to discard a card:\n1: "+Game[i].policy["InOffice"][0]+"\n2: "+Game[i].policy["InOffice"][1]+"\n3: "+Game[i].policy["InOffice"][2])
+     }
+     else if (Game[i].office["Chancellor"] == player && Game[i].policy["InOffice"].length == 2){
+      embed.addField("Game " + i, "You need to discard a card:\n1: "+Game[i].policy["InOffice"][0]+"\n2: "+Game[i].policy["InOffice"][1])
+     }
+  }
+  return embed;
 }
 
 function nextRound(channel){
