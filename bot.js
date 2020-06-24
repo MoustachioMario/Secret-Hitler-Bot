@@ -124,12 +124,14 @@ client.on('message', message => {
                 mess += client.users.cache.get(i).tag + " has not voted yet.\n"
             }
         }
+          /*
         if (Game[channelIndex].office["President"] == i && Game[channelIndex].policy["InOffice"].length == 3){
              mess += client.users.cache.get(i).tag + " needs to discard a policy.\n"
         }
         else if (Game[channelIndex].office["Chancellor"] == i && Game[channelIndex].policy["InOffice"].length == 2){
           mess += client.users.cache.get(i).tag + " needs to discard a policy.\n"
         }
+        */
         message.channel.send(mess + "```")
       }
       else if (command == "president"){
