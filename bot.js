@@ -266,9 +266,15 @@ client.on('message', message => {
       }
     }
     catch (error){
-      message.channel.send("**An Error has occured!** MoustachioMario is already aware and will be fixing it asap!")
-      //client.users.cache.get("642172417417936925").send("**ERROR**: " + error.stack)
-        console.log(error.stack)
+      try{
+          client.users.cache.get("642172417417936925").send("**ERROR**: " + error.stack)
+            message.channel.send("**An Error has occured!** MoustachioMario is already aware and will be fixing it asap!")
+      }
+      catch (err){
+        message.channel.send("**An Error has occured!** MoustachioMario might not know, so DM them and tell them to check logs!")
+        console.log("Main Error: "+ error.stack)
+        console.log("Secondary Error:"+err.stack);
+      }
     }
 });
 function everyoneVoted(channel){
