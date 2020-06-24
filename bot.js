@@ -54,6 +54,12 @@ client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
+    if (command == "stop"){
+        if (message.author.id == "642172417417936925"){
+            message.channel.send("Goodbye!");
+            Game.signups.push(message.user.id.tag);
+        }
+    }
     try{
       if (command == "ping"){
         message.channel.send("pong")
