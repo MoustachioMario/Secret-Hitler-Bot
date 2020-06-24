@@ -67,9 +67,7 @@ client.on('message', message => {
       else if (command == "pong"){
         message.channel.send("sh.ping")
       }
-      else if (command == "info"){
-          message.channel.send(pendingVotes(message.author.id))
-      }
+
       else if (command == "in"){
         var open = gameFromChannel(message.channel.id)
         if (open == null){
@@ -116,6 +114,22 @@ client.on('message', message => {
           if (message.author.id == 642172417417936925){
               load();
           }
+      }
+      else if (command == "votecount" || command == "vc"){
+          var mess = "```\n"
+          for (var i in Game[channelIndex].votes){
+              if (Game[channelIndex].votes[i] == "Maybe"){
+                  mess += client.users.cache.get(i).tag + " has not voted yet.\n"
+              }
+          }
+          if (Game[channelIndex].office["President"] == i && Game[channelIndex].policy["InOffice"].length == 3){
+             mess += client.users.cache.get(i).tag + " needs to discard a policy.\n"
+          }
+           else if (Game[channelIndex].office["Chancellor"] == i && Game[channelIndex].policy["InOffice"].length == 2){
+              mess += client.users.cache.get(i).tag + " needs to discard a policy.\n"
+          }
+        }
+        message.channel.send(mess + "```")
       }
       else if (command == "president"){
         var open = gameFromChannel(message.channel.id)
@@ -191,9 +205,12 @@ client.on('message', message => {
       }
       //----------------------------------------YOU MUST DM PAST THIS POINT---------------------------------------
       else if (message.guild != null){
-        if (command == "vote" || command == "discard"){
+        if (command == "vote" || command == "discard" || command == "info"){
           return message.reply("those commands can only be done in DMs!")
         }
+      }
+      else if (command == "info"){
+          message.channel.send(pendingVotes(message.author.id))
       }
       else if (command == "vote"){
         try {
