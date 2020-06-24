@@ -10,7 +10,7 @@ client.on('ready', () => {
     client.user.setStatus('online')
 });
 
-const prefixes = ["c.",'/'];
+const prefixes = ["sh.",'/'];
 
 const GUILD = "663616368389652480";
 
