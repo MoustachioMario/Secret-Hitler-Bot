@@ -103,6 +103,11 @@ client.on('message', message => {
         createGame(message.channel.id)
         message.channel.send("These signups are now open!")
       }
+      else if (command == "load"){
+          if (message.author.id == 642172417417936925){
+              load();
+          }
+      }
       else if (command == "president"){
         var open = gameFromChannel(message.channel.id)
         message.channel.send("Working " + open)
