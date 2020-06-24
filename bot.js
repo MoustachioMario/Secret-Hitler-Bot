@@ -2,149 +2,218 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const request = require('sync-request')
 
-const prefixes = ["sh.","/"]
-
-var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.APIKEY }
-
 client.on('ready', () => {
+    try {
+      load();
+    } catch (err) {}
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setStatus('online')
 });
 
+const prefixes = ["c.",'/'];
+
+const GUILD = "663616368389652480";
+
+var Game = {};
+
+function load(){
+  var database = JSON.parse(getEvent());
+  if (database.length == 0){
+    Game = {}
+  }
+  else {
+  for (var i in database){
+    Game[database[i].GameID] = new Government(database[i])
+  }
+  }
+  //console.log(Game)
+}
+
+function Government(saved){
+  this.id = saved._id;
+  this.gameID = saved.GameID;
+  this.channel = saved.ChannelID;
+
+  this.alive = saved.Alive;
+  this.roles = saved.Roles;
+  this.votes = saved.Votes;
+
+  this.office = saved.Office;
+  this.policy = saved.Policies;
+  this.passed = saved.Passed;
+  this.failedElections = saved.ElectionsFailed;
+
+  this.status = saved.ActionDone;
+}
+
 client.on('message', message => {
-let prefix = false;
+    let prefix = false;
     for(const thisPrefix of prefixes) {
       if(message.content.startsWith(thisPrefix)) prefix = thisPrefix;
     }
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
-    try {
-        if (command == "ping"){
-            message.channel.send("pongalongadingdong V2")
+    try{
+      if (command == "ping"){
+        message.channel.send("pong")
+      }
+      else if (command == "pong"){
+        message.channel.send("sh.ping")
+      }
+      else if (command == "in"){
+        var open = gameFromChannel(message.channel.id)
+        if (open == null){
+          message.channel.send("There is no open game here :/")
         }
-        else if (command == "get"){
-            message.channel.send(getEvent(args[0]));
+        else if (Game[open].alive.indexOf(message.author.id) != -1){
+          message.channel.send("You\'ve already joined!")
         }
-        else if (command == "patch"){
-            patchEvent(args[0], args[1], args[2]);
-            message.channel.send("Done!")
+        else {
+          Game[open].alive.push(message.author.id)
+          message.channel.send("You are now in the game!")
+          updateDB(Game[open].id, JSON.stringify({"Alive":Game[open].alive}))
         }
-    }
-    catch (error) {
-        client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
-    }
-});
-    //try{
-    //var channelIndex = isChannelOpen(message.channel.id)
-    //if (channelIndex != -1){
-      //var signup = Game.signups[channelIndex][0];
-      //var gameInfo = Game.signups[channelIndex][1];
-    //}
-    /*
-    if (prefix == '/'){
-      if (command == "nominate"){
-        for (var i in gameInfo.players){
-          if (gameInfo.players[i].id == message.author.id){
-          	if (gameInfo.players[i].office != "President"){
-              return message.author.send("You are not president.")
-            }
+      }
+      else if (command == "out"){
+        var open = gameFromChannel(message.channel.id)
+        if (open == null)message.channel.send("There is no open game here :/")
+        console.log(Game[open].alive)
+        for (var i = 0;i< Game[open].alive.length;i++){
+          console.log(Game[open].alive[i] + " " + message.author.id)
+          if (Game[open].alive[i] == message.author.id){
+            Game[open].alive.splice(i,1)
+            i--;
           }
         }
-        for (var i in gameInfo.players){
-          if (gameInfo.players[i].id == message.mentions.members.first().id){
-            if (gameInfo.players[i].office == "Chancellor"){
-              return message.channel.send("You already nominated someone.")
-            }
+        updateDB(Game[open].id, JSON.stringify({"Alive":Game[open].alive}))
+      }
+      else if (command == "print"){
+        var open = gameFromChannel(message.channel.id)
+        message.channel.send("Working " + open)
+        if (open == null){
+          //createGame(message.channel.id)
+          message.channel.send("There is no open game here :/")
+        }
+        else {
+          message.channel.send(Game[open].alive)
+        }
+      }
+      else if (command == "create"){
+        createGame(message.channel.id)
+        message.channel.send("These signups are now open!")
+      }
+      else if (command == "president"){
+        var open = gameFromChannel(message.channel.id)
+        message.channel.send("Working " + open)
+        if (open == null){
+          message.channel.send("There is no open game here :/")
+        }
+        else {
+          console.log(Game[open].office)
+          Game[open].office["President"] = message.mentions.users.first().id;
+          Game[open].office["Chancellor"] = null;
           }
+          updateDB(Game[open].id, JSON.stringify({"Office":Game[open].office}))
+      }
+      else if (command == "nominate"){
+        var chance = message.mentions.users.first().id;
+        var open = gameFromChannel(message.channel.id)
+        if (open == null) return message.channel.send("There is no open game here :/")
+        if (Game[open].office["President"] != message.author.id) return message.channel.send("You are not the president.")
+        if (Game[open].office["Chancellor"] != null) return message.channel.send("You already nominated someone.")
+        if (Game[open].alive.indexOf(chance) == -1) return message.channel.send("The person you nominated is dead or not in the game.")
+        Game[open].office["Chancellor"] = message.mentions.users.first().id;
+        for (var i in Game[open].alive){
+            Game[open].votes[Game[open].alive[i]] = "Maybe";
+            client.users.cache.get(Game[open].alive[i]).send("New Pending Vote! Do /info.")
         }
-        if (args[0] == null){
-          return message.channel.send("You didn't say who you were nominating.");
-        }
-        nominateChancellor(message,message.mentions.members.first().id);
+        message.channel.send(message.guild.members.cache.get(chance).displayName + " has been nominated chancellor!\nPlease DM me with your vote.")
+        Game[open].status = "Voting"
+        updateDB(Game[open].id, JSON.stringify({"Office":Game[open].office,"Votes":Game[open].votes,"ActionDone":Game[open].status}))
       }
       else if (command == "shoot" || command == "execute"){
-        if (Game.signups[channelIndex][1].fascist == 4 || Game.signups[channelIndex][1].fascist == 5){
-          if (Game.signups[channelIndex][1].inOffice.length == 1){
-            for (var i in Game.signups[channelIndex][1].players){
-              if (Game.signups[channelIndex][1].players[i].id == message.author.id){
-                if (Game.signups[channelIndex][1].players[i].office == "President"){
-                  Game.signups[channelIndex][1].players[playerPos(message.mentions.members.first().id,channelIndex)].alive = false;
-                  Game.signups[channelIndex][1].inOffice = [];
-                  message.channel.send("The president has executed "+message.mentions.members.first()+".")
-                  if (Game.signups[channelIndex][1].players[playerPos(message.mentions.members.first().id,channelIndex)].secretRole == "Hitler"){
-                    message.channel.send("The Liberals have executed Hitler.")
-                    return endGame(channelIndex)
-                  }
-                  else {
-                    message.channel.send("They were not hitler.")
-                    nextRound(channelIndex);
-                  }
-                }
-                return message.channel.send("You are not the President.")
-              }
+        var open = gameFromChannel(message.channel.id)
+        if (Game[open].status != "Execution") return message.channel.send("There are no scheduled executions at this moment.")
+        if (Game[open].office["President"] != message.author.id) return message.reply(" you are not the president")
+        if (Game[open].alive.indexOf(message.mentions.members.first().id) == -1) return message.reply(" the person you attempted to shoot is already dead, or not in the game!")
+        Game[open].alive.splice(Game[open].alive.indexOf(message.mentions.members.first().id),1)
+        message.channel.send("The president has executed "+client.users.cache.get(message.mentions.members.first())+".")
+        for (var i in Game[open].roles){
+          if (Game[open].roles[i][0] == message.mentions.members.first().id){
+            if (Game[open].roles[i][1] == "Hitler"){
+              message.channel.send("The Liberals have executed Hitler.")
+              return endGame(channelIndex)
             }
           }
         }
-        return message.channel.send("The President does not have enough power to execute anyone.")
+        message.channel.send("They were not hitler.")
+        nextRound(open);
       }
-      else if (command == "inv" || command == "investigate"){
-        if (Game.signups[channelIndex][1].fascist == 2 || (Game.signups[channelIndex][1].fascist == 1 && Game.signups[channelIndex][1].players.length > 8)){
-          if (Game.signups[channelIndex][1].inOffice.length == 1){
-            for (var i in Game.signups[channelIndex][1].players){
-              if (Game.signups[channelIndex][1].players[i].id == message.author.id){
-                if (Game.signups[channelIndex][1].players[i].office == "President"){
-                  Game.signups[channelIndex][1].inOffice = [];
-                  message.channel.send("The president has investigated "+message.mentions.members.first()+".")
-                  client.users.cache.get(Game.signups[channelIndex][1].players[i].id).send("Your target\'s party membership is " + Game.signups[channelIndex][1].players[playerPos(message.mentions.members.first().id,channelIndex)].partyMembership)
-                  nextRound(channelIndex)
-                }
-                return message.channel.send("You are not the President.")
-              }
-            }
+      else if (command == "investigate" || command == "inv"){
+        var open = gameFromChannel(message.channel.id)
+        if (Game[open].status != "Investigation") return message.channel.send("There are no scheduled investigations at this moment.")
+        if (Game[open].office["President"] != message.author.id) return message.reply(" you are not the president")
+        if (Game[open].alive.indexOf(message.mentions.members.first().id) == -1) return message.reply(" the person you attempted to investigate is not in the game!")
+        Game[open].alive.splice(Game[open].alive.indexOf(message.mentions.members.first().id),1)
+        message.channel.send("The president has investigated "+client.users.cache.get(message.mentions.members.first())+".")
+        var membership = null
+        for (var i in Game[open].roles){
+          if (Game[open].roles[i][0] == message.mentions.members.first().id){
+             if (Game[open].roles[i][1] == "Liberal"){
+               membership = "Liberals"
+             }
+             else {
+               membership = "Fascists"
+             }
           }
         }
-        return message.channel.send("The President does not have enough power to investigate anyone.")
+        client.users.cache.get(Game[open].office["President"]).send(client.users.cache.get(message.mentions.members.first().id).tag + "\'s party membership is aligned with the " + membership)
+        nextRound(open);
       }
-      else if (message.guild === null){
-        if (command == "info"){
-          message.author.send(pendingVotes(message.author.id))//+"\nTo vote DM me /vote [Game #] [ja/nein]\nTo discard do /discard [Game #] [# next to card]")
+      else if (command == "start"){
+        setUpGame(message)
+      }
+      //----------------------------------------YOU MUST DM PAST THIS POINT---------------------------------------
+      else if (message.guild != null){
+        if (command == "vote" || command == "discard"){
+          return message.reply("those commands can only be done in DMs!")
         }
-        else if (command == "donate"){
-          message.channel.send("Please Consider Donating!\nhttps://www.patreon.com/MoustachioMario")
-        }
-        else if (command == "vote"){
-          if (args[0] >= Game.signups.length || args[0] == null){
-            return message.channel.send("That game does not exist")
-          }
-          if (args[1] != "nein" && args[1] != "ja"){
-            return message.channel.send("Acceptable votes are: \"ja\" and \"nein\"")
-          }
-          if (Game.signups[args[0]][1].players[playerPos(message.author.id,args[0])].vote == "Maybe"){
-            message.channel.send("You have voted " + args[1] + ".")
-            Game.signups[args[0]][1].players[playerPos(message.author.id,args[0])].vote = args[1]
-            everyoneVoted(args[0])
-          }
-          else {
-            message.channel.send("You already voted!")
+      }
+      else if (command == "vote"){
+        try {
+          console.log(Game[args[0]].status)
+          if (Game[args[0]].status != "Voting"){
+            return message.channel.send("It is currently not the voting phase!")
           }
         }
-        else if (command == "discard"){
-          if (args[0] >= Game.signups.length || args[0] == null){
-            return message.channel.send("That game does not exist")
+        catch (err){
+          return message.channel.send("That game does not exist!")
+        }
+        var vote = "Maybe"
+        if (args[1] == "Ja" || args[1] == "Yes" || args[1] == "yes" || args[1] == "ja"){
+          vote = "ja"
+        }
+        else if (args[1] == "nein" || args[1] == "Nein" || args[1] == "no" || args[1] == "No"){
+          vote = "nein"
+        }
+        else {
+          vote = "maybe"
+        }
+        Game[args[0]].votes[message.author.id] = vote
+        message.channel.send("You have voted " + vote + "!")
+        updateDB(Game[args[0]].id, JSON.stringify({"Votes":Game[args[0]].votes}))
+        everyoneVoted(args[0])
+      }
+      else if (command == "discard"){
+          if (Game[args[0]].policy["InOffice"].length == 3 && Game[args[0]].office["President"] != message.author.id){
+            return message.channel.send("YOU ARE NOT PRESIDENT");
           }
-          for (var i in Game.signups[args[0]][1].players){
-            if (Game.signups[args[0]][1].players[i].id == message.author.id){
-              if (Game.signups[args[0]][1].players[i].office != "President" && Game.signups[args[0]][1].inOffice.length == 3){
-                return message.channel.send("YOU ARE NOT PRESIDENT");
-              }
-              else if (Game.signups[args[0]][1].players[i].office != "Chancellor" && Game.signups[args[0]][1].inOffice.length == 2){
-                return message.channel.send("YOU ARE NOT CHANCELLOR");
-              }
-              else if (Game.signups[args[0]][1].inOffice.length == 1){
-                return message.channel.send("There is nothing for you to do here.")
-              }
-            }
+          else if (Game[args[0]].policy["InOffice"].length == 2 && Game[args[0]].office["Chancellor"] != message.author.id){
+            return message.channel.send("YOU ARE NOT CHANCELLOR");
+          }
+          else if (Game[args[0]].policy["InOffice"].length == 1 || Game[args[0]].policy["InOffice"].length == 0){
+            return message.channel.send("There is nothing for you to do here.")
           }
           var discarding = "Error"
           if (args[1] == "L" || args[1] == "Liberal" || args[0] == "l"){
@@ -158,634 +227,79 @@ let prefix = false;
           }
           
           var discardingComplete = false;
-          for (var i in Game.signups[args[0]][1].inOffice){
-            if (Game.signups[args[0]][1].inOffice[i] == discarding && discardingComplete == false){
-              message.channel.send("You have discarded a " + Game.signups[args[0]][1].inOffice[i] + " policy");
+          for (var i in Game[args[0]].policy["InOffice"]){
+            if (Game[args[0]].policy["InOffice"][i] == discarding && discardingComplete == false){
+              message.channel.send("You have discarded a " + Game[args[0]].policy["InOffice"][i] + " policy");
               discardingComplete = true;
-              Game.signups[args[0]][1].discarded.push(Game.signups[args[0]][1].inOffice[i])
-              Game.signups[args[0]][1].inOffice.splice(i,1)
+              Game[args[0]].policy["Discard"].push(Game[args[0]].policy["InOffice"][i])
+              Game[args[0]].policy["InOffice"].splice(i,1)
             }
           }
           if (discardingComplete == false){
-              message.channel.send("You have discarded a " + Game.signups[args[0]][1].inOffice[0] + " policy");
+              message.channel.send("You don\' have a "+discarding+", so you discarded a " + Game[args[0]].policy["InOffice"][0] + " policy");
               discardingComplete = true;
-              Game.signups[args[0]][1].discarded.push(Game.signups[args[0]][1].inOffice[0])
-              Game.signups[args[0]][1].inOffice.splice(0,1)
+            Game[args[0]].policy["Discard"].push(Game[args[0]].policy["InOffice"][0])
+              Game[args[0]].policy["InOffice"].splice(0,1)
+        }
+        updateDB(Game[args[0]].id, JSON.stringify({"Policies":Game[args[0]].policy}))
+        if (Game[args[0]].policy["InOffice"].length == 2){
+                  client.users.cache.get(Game[args[0]].office["Chancellor"]).send(new Discord.MessageEmbed().setTitle("Game " + args[0]).addField("Please discard a card","1: "+Game[args[0]].policy["InOffice"][0]+"\n2: "+Game[args[0]].policy["InOffice"][1]))
+        }
+        if (Game[args[0]].policy["InOffice"].length == 1){
+          if (Game[args[0]].policy["InOffice"][0] == "Liberal"){
+            passedLiberal(args[0])
           }
-          
-          if (Game.signups[args[0]][1].inOffice.length == 2){
-            for (var i = 0; i<Game.signups[args[0]][1].players.length;i++){
-              if (Game.signups[args[0]][1].players[i].office == "Chancellor"){
-                  client.users.cache.get(Game.signups[args[0]][1].players[i].id).send(new Discord.MessageEmbed().setTitle("Game " + args[0]).addField("Please discard a card","1: "+Game.signups[args[0]][1].inOffice[0]+"\n2: "+Game.signups[args[0]][1].inOffice[1]))
-              }
-            }
+          else {
+            passedFascist(args[0])
           }
-          if (Game.signups[args[0]][1].inOffice.length == 1){
-            if (Game.signups[args[0]][1].inOffice[0] == "Liberal"){
-              passedLiberal(args[0])
-            }
-            else {
-              passedFascist(args[0])
-            }
-          }
+          updateDB(Game[args[0]].id, JSON.stringify({"Passed":Game[args[0]].passed}))
         }
       }
     }
-    if (prefix != "sh."){}
-    else if (command == "help"){
-      var embed = new Discord.MessageEmbed();
-      if (args[0] == null){
-        embed.setTitle("Help")
-        embed.addField("**Moderator Commands**","`sh.help moderator`",true)
-        embed.addField("**Player Commands**","`sh.help player`",true)
-      }
-      else if (args[0] == "player"){
-        embed.setTitle("Player Commands");
-        embed.addField("**Voting**","[DM] `/vote [Game Number] [Ja/Nein]`")
-        embed.addField("**Discarding**","[DM] `/discard [Game Number] [Liberal/Fascist]`")
-        embed.addField("**Nominating**","`/nominate @mention`",true)
-        embed.addField("**Executing**","`/execute @mention`",true)
-        embed.addField("**Investigating**","`/investigate @mention`",true)
-      }
-      
-      embed.setFooter("Made by MoustachioMario#2067")
-      message.channel.send(embed)
+    catch (error){
+      message.channel.send("**An Error has occured!** MoustachioMario is already aware and will be fixing it asap!")
+      client.users.cache.get("642172417417936925").send("**ERROR**: " + error.stack)
     }
-    else if (command == "break"){
-      if (message.author.id == '642172417417936925'){
-        Game.signups[10000000][1]
-        //breakBot();
-      }
-    }
-    else if (command == "allow"){
-      if (!requiredRoles(message)){
-        return message.channel.send("**ERROR**: Missing Permissions")
-      }
-      if (!args[0]) return;
-
-      if (args[0].startsWith('<@') && args[0].endsWith('>')) {
-        args[0] = args[0].slice(2, -1);
-      
-        if (args[0].startsWith('&')) {
-          args[0] = args[0].slice(1);
-        }
-      }
-      for (var i in Game.trustedRoles){
-        if (Game.trustedRoles[i].id == message.guild.id){
-          message.channel.send("Added")
-          return Game.trustedRoles[i].trustedRoles.push(args[0])
-          //return save();
-        }
-      }
-      Game.trustedRoles.push(new Server(message.guild.id, args[0]))
-    }
-    else if (command == "donate"){
-      message.channel.send("Please Consider Donating!\nhttps://www.patreon.com/MoustachioMario")
-    }
-    else if (message.author.id == 642172417417936925 && command == "bot"){
-            message.channel.send("Attempting To Save Changes...")
-            client.user.setStatus('dnd');
-            setTimeout(function() {client.users.members.id},1000)
-    }
-    else if (message.guild === null){
-      message.author.send(pendingVotes(message.author.id))
-    }
-    else if (command == "signups"){
-      if (!requiredRoles(message)){
-        return ;//message.channel.send("You do not have permission to do this.")
-      }
-      if (channelIndex != -1 && Game.signups[channelIndex][0][4] == "IN GAME"){
-        return;
-      }
-      if (args[0] == null){
-        return message.channel.send("You failed to provide arguments!\nArguements are: open, close and delete!")
-      }
-      if (args[0] == "open"){
-        if (channelIndex == -1){
-          //[[Channel ID  |  MESSAGE ID  |  PLAYERS  |  BACKUPS  | SINGUPS OPEN? | MAX LENGTH | GUILD] [GAME INFO] [CARDS]]
-          Game.signups.push([[message.channel.id,null,[],[],true,-1,message.guild.id],[]])
-          message.channel.send("```ini\nLOADING...\n```").then(msg => {
-            Game.signups[Game.signups.length-1][0][1] = msg.id
-            updatePlayerlist(message,Game.signups.length-1)
-            msg.pin();
-          })
-          message.channel.send("This channel is now open to signups")
-        }
-        else {
-          if (Game.signups[channelIndex][0][4]){
-            //return message.author.send("Signups on this channel are already open!")
-          }
-          Game.signups[channelIndex][0][4] = true;
-          message.channel.send("The signups on this channel have been reopened!")
-        }
-      }
-      else if (args[0] == "close"){
-        if (channelIndex == -1){
-          message.author.send("The signups you were trying to close does not exist!")
-        }
-        Game.signups[channelIndex][0][4] = false;
-        message.channel.send("The signups in this channel are now closed.")
-      }
-      else if (args[0] == "delete"){
-        if (message.author.id != 387583392759283713){
-          //return message.reply("You do not have permission to do this.")
-        }
-        if (channelIndex == -1){
-          return message.channel.send("Signups in this channel have not been created yet. Try doing /signups open to create some.")
-        }
-        Game.signups.splice(channelIndex,1)
-        message.channel.send("The signups on this channel have been deleted.")
-      }
-      }
-    else if (command == "mute"){
-        if (!requiredRoles(message)){
-          return;
-        }
-        message.guild.channels.forEach(channel => {
-        channel.overwritePermissions(channel.guild.defaultRole, { MENTION_EVERYONE: false });      
-        })
-    }
-    else if (command == "start"){
-      if (!requiredRoles(message)){
-        return;
-      }
-      //COMMENT THIS OUT
-      else if (channelIndex != -1){
-        for (i in Game.signups[channelIndex][0][2]){
-          message.guild.members.get(Game.signups[channelIndex][0][2][i]).addRole(message.guild.roles.get('671874921898442762'));
-        }
-        message.channel.send("Players now have the [Alive Line Special] role!")
-      }
-      if (Game.signups[channelIndex][0][2].length < 5){
-        return message.channel.send("**ERROR** Too Few Players")
-      }
-      else if (Game.signups[channelIndex][0][2].length > 10){
-        return message.channel.send("**ERROR** Too many Players")
-      }
-
-      setUpGame(message,channelIndex)
-      Game.signups[channelIndex][0][4] = "IN GAME"
-    }
-    else if (command == "votecount" || command == "vc"){
-      var mess = "```\n"
-      for (var i in Game.signups[channelIndex][1].players){
-        if (Game.signups[channelIndex][1].players[i].alive == true){
-          if (Game.signups[channelIndex][1].players[i].vote == "Maybe")
-          mess += client.users.cache.get(Game.signups[channelIndex][1].players[i].id).tag + " has not voted yet.\n"
-        }
-      else {
-          mess += client.users.cache.get(Game.signups[channelIndex][1].players[i].id).tag + " is dead.\n"
-        }
-        if (Game.signups[channelIndex][1].players[i].office == "President" && Game.signups[channelIndex][1].inOffice.length == 3){
-          mess += client.users.cache.get(Game.signups[channelIndex][1].players[i].id).tag + " needs to discard a policy.\n"
-        }
-        else if (Game.signups[channelIndex][1].players[i].office == "Chancellor" && Game.signups[channelIndex][1].inOffice.length == 2){
-          mess += client.users.cache.get(Game.signups[channelIndex][1].players[i].id).tag + " needs to discard a policy.\n"
-          }
-        }
-        message.channel.send(mess + "```")
-      }
-    else if (channelIndex == -1){
-      if (command == "in" || command == "out" || command == "backup" || command == "unbackup") {}
-      //message.channel.send("This channel not is accepting signups!")
-    }
-    else if (Game.signups[channelIndex][0][4] == false || Game.signups[channelIndex][0][4] == "IN GAME"){
-      if (command == "in" || command == "out" || command == "backup" || command == "unbackup"){}
-        //message.channel.send("The signups in this channel are closed.")
-    }
-    else {
-      if (command == "in"){
-        for (var x in Game.signups[channelIndex][0][2]){
-          if (Game.signups[channelIndex][0][2][x] == message.author.id){
-            return message.author.send("You have already joined that signup list.")
-          }
-        }
-        message.react("✅")
-        Game.signups[channelIndex][0][2].push(message.author.id)
-        updatePlayerlist(message,channelIndex)
-      }
-      else if (command == "out"){
-        for (var i in Game.signups[channelIndex][0][2]){
-          if (Game.signups[channelIndex][0][2][i] == message.author.id){
-            message.react("✅")
-            Game.signups[channelIndex][0][2].splice(i,1)
-            return updatePlayerlist(message,channelIndex)
-          }
-          }
-        //message.channel.send("You were not in the game to begin with, " + message.author)
-      }
-      else if (command == "backup"){
-        for (var x in Game.signups[channelIndex][0][3]){
-          if (Game.signups[channelIndex][0][3][x] == message.author.id){
-            //return message.author.send("You are already a backup.")
-          }
-        }
-        //message.author.send("You are now a backup.")
-        message.react("✅")
-        Game.signups[channelIndex][0][3].push(message.author.id)
-        updatePlayerlist(message,channelIndex)
-      }
-      else if (command == "unbackup"){
-        for (var i in Game.signups[channelIndex][0][3]){
-          if (Game.signups[channelIndex][0][3][i] == message.author.id){
-            //message.author.send("you have been removed from backups.")
-            message.react("✅")
-            Game.signups[channelIndex][0][3].splice(i,1)
-            return updatePlayerlist(message,channelIndex)
-          }
-        }
-        //message.channel.send("You were never a backup to begin with, " + message.author)
-      }
-      else if (command == "replace"){
-        if (!requiredRoles(message)){
-          return;
-        }
-        if (args[0] == null){
-          return message.author.send("Do /replace [the number next to the player]")
-        }
-        else {
-          Game.signups[channelIndex][0][2][args[0]] = message.mentions.members.first().id
-          message.mentions.members.first().send("You are " + Game.signups[channelIndex][1][args[0]][1])
-          message.react("✅")
-          updatePlayerlist(message,channelIndex)
-        }
-      }
-      else if (command == "remove"){
-        if (!requiredRoles(message)){
-          return;
-        }
-        if (args[0] == null){
-          return message.author.send("Do /remove [the number next to the player]")
-        }
-        else {
-          Game.signups[channelIndex][0][2].splice(args[0]-1,1)
-          message.react("✅")
-          updatePlayerlist(message,channelIndex)
-        }
-      }
-      //else if (command == "forceadd"){
-        //if (!message.author.id == 642172417417936925){
-          //return;
-        //}
-        //for (var x in Game.signups[channelIndex][2]){
-          //if (Game.signups[channelIndex][2][x] == message.mentions.users.first().id){
-            //return;
-          //}
-        //}
-        //message.react("✅")
-        //Game.signups[channelIndex][2].push(message.mentions.users.first().id)
-        //updatePlayerlist(message,channelIndex)
-      //}
-
-      //else if (command == "reshuffle"){
-        //shuffleDeck(channelIndex);
-      //}
-    }
-    //save();
-  }
-  catch (err) {
-    //message.channel.send("**ERROR**: " + err + "\nMoustachioMario has been notified.")
-    client.users.cache.get('642172417417936925').send("**Full Error:** " + err.stack);
-  }
 });
-*/
-client.login(process.env.TOKEN);
-
-/*
-function isChannelOpen(channel){
-  for (var i in Game.signups){
-    if (channel == Game.signups[i][0][0]){
-      return i;
-    }
-  }
-  return -1;
-}
-
-function save() {
-  var json = JSON.stringify(Game);
-
-  fs.writeFile("database.json", json, function(err) {
-    if (err) throw err;
-  });
-  var text = fs.readFileSync("database.json", "utf8");
-
-}
-
-function load() {
-  var text = fs.readFileSync("database.json", "utf8");
-  Game = JSON.parse(text);
-}
-function updatePlayerlist(message, index){
-  message.channel.messages.fetch(Game.signups[index][0][1]).then(msg => {
-      var update = "```ini\nPLAYERLIST:\n"
-      if (Game.signups[index][0][5] == -1){
-          for (var i in Game.signups[index][0][2]){
-            update += "["+(i*1+1)+"] " + message.member.guild.members.cache.find(s => s.id == Game.signups[index][0][2][i]).displayName + "\n";
-          }
-      }
-      else {
-        
-      }
-      update += "\nBACKUPS\n\n"
-      for (var i in Game.signups[index][0][3]){
-      update += "["+(i*1+1)+"] " + message.member.guild.members.cache.find(s => s.id == Game.signups[index][0][3][i]).displayName + "\n";
-      }
-          msg.edit(update + "```")
-  })
-  
-}
-
-client.on('guildMemberRemove', user => {
-   for (var i in Game.signups){
-     for (var x in Game.signups[i][0][2]){
-       if (user.id == Game.signups[i][0][2][x]){
-         if (user.guild.id == Game.signups[i][0][6]){
-            //Game.signups[i][0][2].splice(x,1)
-         }
-       }
-     }
-   }
-});
-
-
-
-function requiredRoles (message) {
-  if (message.member.hasPermission("ADMINISTRATOR")) return true;
-    for (var i in Game.trustedRoles){
-      if (Game.trustedRoles[i].id == message.guild.id){
-        for (var x in Game.trustedRoles[i].trustedRoles){
-          if (message.member.roles.cache.some(role => role.id === Game.trustedRoles[i].trustedRoles[x])){
-            return true;
-          }
-        }
-        return false;
-      }
-    }
-    return false;
-}
-
-function setUpGame(message, channelIndex){
-  //[ID | Role | Alignment | Termlocked | President/Chancellor | Ja/Nien/Maybe]
-  //------------------------------------------------------SETTING UP-----------------------------------------------------------
-  var gameInfo = new Government();
-  //----------------------------------------------------ADDING ROLES-------------------------------------------------------
-  var rolelist = ["Hitler","Fascist","Liberal","Liberal","Liberal"]
-  for (var i = 6; i<=Game.signups[channelIndex][0][2].length;i++){
-    if (i == 6 || i == 8 || i == 10){
-      rolelist.push("Liberal");
-    }
-    if (i == 7 || i == 9){
-      rolelist.push("Fascist");
-    }
-  }
-  //-------------------------------------------------ASSIGNING ROLES-------------------------------------------------------
-  for (var i in Game.signups[channelIndex][0][2]){
-    var index = Math.floor(Math.random()*rolelist.length);
-    var role = rolelist[index]
-    rolelist.splice(index,1)
-    //gameInfo.push([Game.signups[channelIndex][0][2][i],role,align,false,false,null])
-    gameInfo.players.push(new Player(Game.signups[channelIndex][0][2][i], role))
-  }
-  //-------------------------------------------------ANNOUCING ROLES-------------------------------------------------------
-  var Fascists = []
-  for (i in gameInfo.players){
-    //FIND FASCISTS
-    if (gameInfo.players[i].secretRole == "Fascist"){
-      Fascists.push(i)
-    }
-    else if (gameInfo.players[i].secretRole == "Hitler"){
-      Fascists.unshift(i)
-    }
-  }
-  //create message
-  var mess = "```diff\nYou are a\n-Fascist\n\nYou know that " + message.guild.members.cache.get(gameInfo.players[Fascists[0]].id).displayName + " is Hitler.\n\nYour fellow fascists are:\n";
-  for (var i = 1; i < Fascists.length;i++){
-    mess += message.guild.members.cache.get(gameInfo.players[Fascists[i]].id).displayName
-    if (i < Fascists.length-2){
-      mess += ", "
-    }
-    else if (i == Fascists.length-1){
-      mess += "\n```"
-    }
-    else {
-      mess += " and "
-    }
-  }
-  //send Fascists Message
-  for (var i = 1; i < Fascists.length;i++){
-    message.guild.members.cache.get(gameInfo.players[Fascists[i]].id).send(mess)
-  }
-  //Send Hitler Message
-  if (Fascists.length == 2){
-    message.guild.members.cache.get(gameInfo.players[Fascists[0]].id).send("```diff\nYou are\n-Hitler\n\nYou know that " + message.guild.members.cache.get(gameInfo.players[Fascists[1]].id).displayName + " is your Fascist.\n```");
-  }
-  else {
-    message.guild.members.cache.get(gameInfo.players[Fascists[0]].id).send("```diff\nYou are\n-Hitler\n\nYou do not know who the fascists are.\n```")
-  }
-  //Send Liberal Messages
-  for (i in gameInfo.players){
-    if (gameInfo.players[i].secretRole == "Liberal"){
-      message.guild.members.cache.get(gameInfo.players[i].id).send("```diff\nYou are\n+Liberal\n```")
-    }
-  }
-  //[[CARDS][DISCARDS][FASCISTS,LIBERALS][WAITING CARDS]]
-  //----------------------------------------------------DONE ASSIGNING ROLES--------------------------------------------------
-  //Game.signups[channelIndex][2] = [[],[],[0,0],[]]
-  var setup = ["Liberal","Liberal","Liberal","Liberal","Liberal","Liberal","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist"]
-  for (var i = 0; i<setup.length;){
-    var index = Math.floor(Math.random()*setup.length)
-    //Game.signups[channelIndex][2][0].push(setup[index])
-    gameInfo.policy.push(setup[index])
-    setup.splice(index,1)
-  }
-  var pres = Math.floor(Math.random()*gameInfo.players.length)
-  gameInfo.players[pres].office = "President"
-  message.channel.send(message.guild.members.cache.get(gameInfo.players[pres].id).displayName + " is the President and must nominate a chancellor.");
-  Game.signups[channelIndex][1] = gameInfo
-}
-
-function passedFascist(channelIndex, topDeck = false){
-  Game.signups[channelIndex][1].fascist++;
-  var fas = Game.signups[channelIndex][1].fascist;
-  var embed = new Discord.MessageEmbed().setTitle("A Fascist Policy has been enacted.").setColor("b22222").addField("Fascist Policies Passed","**"+Game.signups[channelIndex][1].fascist+"/6** until Fascist Victory")
-  if (fas == 6){
-    embed.addField("The fascist party has won.")
-    endGame(channelIndex)
-  }
-  else if (topDeck == false){
-    if (fas == 4 || fas == 5){
-      embed.addField("Presidential Power","The president must execute another player.")
-    }
-    else if (fas == 3 && Game.signups[channelIndex][1].players.length > 6){
-      embed.addField("Special Election","The president elect another player to be president. [WORK IN PROGRESS")
-      nextRound(channelIndex)
-    }
-    else if (fas == 3 && Game.signups[channelIndex][1].players.length < 7){
-      embed.addField("Policy Peek","The president will be shown the top 3 policies")
-      for (var i in Game.signups[channelIndex][1].players){
-        if (Game.signups[channelIndex][1].players[i].office == "President"){
-            client.users.cache.get(Game.signups[channelIndex][1].players[i].id).send("Here are the top three cards:\n\n"+Game.signups[channelIndex][1].policy[0]+"\n"+Game.signups[channelIndex][1].policy[1]+"\n"+Game.signups[channelIndex][1].policy[0])
-        }
-      }
-      nextRound(channelIndex)
-    }
-    else if (fas == 2  && Game.signups[channelIndex][1].players.length > 6){
-      embed.addField("Investigate Loyalty","The president must investigate another player.")
-    }
-    else if (fas == 2  && Game.signups[channelIndex][1].players.length > 8){
-      embed.addField("The president must investigate another player.")
-    }
-    else {
-      nextRound(channelIndex)
-    }
-  }
-  else {
-    embed.addField("Top Deck","Any Executive Powers gained were lost.")
-    nextRound(channelIndex)
-  }
-  embed.setFooter("Made by MoustachioMario#2067")
-  client.channels.cache.get(Game.signups[channelIndex][0][0]).send(embed)
-}
-function passedLiberal(channelIndex){
-  Game.signups[channelIndex][1].liberal++;
-  var embed = new Discord.MessageEmbed().setTitle("A Liberal Policy has been enacted.").setColor("1167b1").addField("Liberal Policies Passed","**"+Game.signups[channelIndex][1].liberal+"/5** until Liberal Victory")
-  if (Game.signups[channelIndex][1].liberal == 5){
-    embed.addField("Game Over","The Liberal party has won.")
-    endGame(channelIndex)
-  }
-  else {
-    nextRound(channelIndex)
-  }
-  embed.setFooter("Made by MoustachioMario#2067")
-  client.channels.cache.get(Game.signups[channelIndex][0][0]).send(embed)
-}
-
-function nominateChancellor(message, target){
-  var channelIndex = isChannelOpen(message.channel.id)
-  if (Game.signups[channelIndex][1].players[playerPos(target,channelIndex)].alive == false){
-    return message.channel.send("The person you were trying to nominate is dead.")
-  }
-  Game.signups[channelIndex][1].players[playerPos(target,channelIndex)].office = "Chancellor"
-  for (var i in Game.signups[channelIndex][1].players){
-    if (Game.signups[channelIndex][1].players[i].alive == true){
-      Game.signups[channelIndex][1].players[i].vote = "Maybe";
-      client.users.cache.get(Game.signups[channelIndex][1].players[i].id).send("New Pending Vote! Do /info.")
-    }
-  }
-  message.channel.send(message.guild.members.cache.get(target).displayName + " has been nominated chancellor!\nPlease DM me with your vote.")
-}
-
-function playerPos(player, channelIndex){
-  for (var i in Game.signups[channelIndex][1].players){
-    if (Game.signups[channelIndex][1].players[i].id == player){
-      return i;
-    }
-  }
-  return -1;
-}
-
-function pendingVotes(player){
-  var embed = new Discord.MessageEmbed().setTitle("Pending Actions");
-  for (var i in Game.signups){  
-     var posPlayer = playerPos(player,i)
-     if (posPlayer == -1){
-     }
-     else if (Game.signups[i][1].players[posPlayer].vote == "Maybe"){
-   //    mess += "```\n[GAME " + i + "] You need to vote Ya or Nien for:\nPresident " + findPres(i) + "\nChancellor " + findChancellor(i)+"\n```"
-       embed.addField("Game " + i, "You need to vote Ja or Nein for:\nPresident " + findPres(i) + "\nChancellor " + findChancellor(i))
-     }
-     else if (Game.signups[i][1].players[posPlayer].office == "President" && Game.signups[i][1].inOffice.length == 3){
- //      mess += "```\n[GAME " + i + "] You need to discard a card:\n1: "+Game.signups[i][2][3][0]+"\n2: "+Game.signups[i][2][3][1]+"\n3: "+Game.signups[i][2][3][2]+"\n```"
-       embed.addField("Game " + i, "You need to discard a card:\n1: "+Game.signups[i][1].inOffice[0]+"\n2: "+Game.signups[i][1].inOffice[1]+"\n3: "+Game.signups[i][1].inOffice[2])
-     }
-     else if (Game.signups[i][1].players[posPlayer].office == "Chancellor" && Game.signups[i][1].inOffice.length == 2){
-     //  mess += "```\n[GAME " + i + "] You need to discard a card:\n1: "+Game.signups[i][2][3][0]+"\n2: "+Game.signups[i][2][3][1]+"\n```"
-      embed.addField("Game " + i, "You need to discard a card:\n1: "+Game.signups[i][1].inOffice[0]+"\n2: "+Game.signups[i][1].inOffice[1])
-     }
-  }
-  return embed;
-}
-
-function findPres(channel){
-  for (var i in Game.signups[channel][1].players){
-    if (Game.signups[channel][1].players[i].office == "President"){
-      return client.users.cache.get(Game.signups[channel][1].players[i].id).tag
-    }
-  }
-  return "THERE IS NO PRESIDENT CURRENTLY"
-}
-function findChancellor(channel){
-  for (var i in Game.signups[channel][1].players){
-    if (Game.signups[channel][1].players[i].office == "Chancellor"){
-      return client.users.cache.get(Game.signups[channel][1].players[i].id).tag
-    }
-  }
-  return "THERE IS NO CHANCELLOR CURRENTLY";
-}
-
-function printVote(channel){
-  var yes = 0;
-  var no = 0;
-  var embed = new Discord.MessageEmbed().setTitle("Votes");
-  for (var i in Game.signups[channel][1].players){
-    embed.addField(client.users.cache.get(Game.signups[channel][1].players[i].id).tag,"voted " + Game.signups[channel][1].players[i].vote)
-    if (Game.signups[channel][1].players[i].vote == "ja"){
-      yes++;
-    }
-    else {
-      no++;
-    }
-  }
-  if (yes<=no){
-    embed.setColor('#b22222');
-  }
-  else {
-    embed.setColor('#228b22')
-  }
-  return embed;
-}
 
 function everyoneVoted(channel){
   var ja = 0;
   var nein = 0;
-  for (var i in Game.signups[channel][1].players){
-    if (Game.signups[channel][1].players[i].alive == true){
-      if (Game.signups[channel][1].players[i].vote == "Maybe"){
-        return;
-      }
-      else if (Game.signups[channel][1].players[i].vote == "ja"){
-        ja++;
-      }
-      else{
-        nein++;
-      }
+  for (var i in Game[channel].votes){
+    if (Game[channel].votes[i] == "Maybe"){
+      return false;
+    }
+    else if (Game[channel].votes[i] == "ja"){
+      ja++;
+    }
+    else{
+      nein++;
     }
   }
-  client.channels.cache.get(Game.signups[channel][0][0]).send(printVote(channel))
+  console.log(Game[channel].channel)//
+  client.channels.cache.get(Game[channel].channel).send(printVote(channel))
   if (ja > nein){
-    for (var i in Game.signups[channel][1].players){
-      if (Game.signups[channel][1].players[i].office == "Chancellor" && Game.signups[channel][1].players[i].secretRole == "Hitler" && Game.signups[channel][1].fascist >= 3){
-        client.channels.cache.get(Game.signups[channel][0][0]).send(new Discord.MessageEmbed().setTitle("Fascists win").setColor('b22222').addField("Game Over","Hitler was elected as chancellor after 3 fascist policies were passed."))
-        return endGame(channel)
+    for (var i in Game[channel].roles){
+      if (Game[channel].roles[i][0] == Game[channel].office["Chancellor"] && Game[channel].roles[i][0] == "Hitler" && Game[channel].passed["Fascist"] >= 3){
+        client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Fascists win").setColor('b22222').addField("Game Over","Hitler was elected as chancellor after 3 fascist policies were passed."))
+        //return endGame(channel)
       }
     }
-    Game.signups[channel][1].failedElections = 0;
-    client.channels.cache.get(Game.signups[channel][0][0]).send("The president will now discard a card")
-    Game.signups[channel][1].inOffice.push(Game.signups[channel][1].policy.shift())
-    Game.signups[channel][1].inOffice.push(Game.signups[channel][1].policy.shift())
-    Game.signups[channel][1].inOffice.push(Game.signups[channel][1].policy.shift())
-    for (var i = 0; i<Game.signups[channel][1].players.length;i++){
-      if (Game.signups[channel][1].players[i].office == "President"){
-        client.users.cache.get(Game.signups[channel][1].players[i].id).send((new Discord.MessageEmbed().setTitle("Game " + channel).addField("Please discard a card","1: "+Game.signups[channel][1].inOffice[0]+"\n2: "+Game.signups[channel][1].inOffice[1]+"\n3: "+Game.signups[channel][1].inOffice[2])))
-      }
-    }
+    Game[channel].failedElections = 0;
+    client.channels.cache.get(Game[channel].channel).send("The president will now discard a card")
+    Game[channel].status = "President Discarding"
+    Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
+    Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
+    Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
+    client.users.cache.get(Game[channel].office["President"]).send((new Discord.MessageEmbed().setTitle("Game " + channel).addField("Please discard a card","1: "+Game[channel].policy["InOffice"][0]+"\n2: "+Game[channel].policy["InOffice"][1]+"\n3: "+Game[channel].policy["InOffice"][2])))
+    updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy, "ActionDone":"President Discarding"}))
   }
   else {
-    Game.signups[channel][1].failedElections++;
-    client.channels.cache.get(Game.signups[channel][0][0]).send(new Discord.MessageEmbed().setTitle("Failed Election").addField("Elections Failed","**" + Game.signups[channel][1].failedElections + " / 3** Failed Election in a row before the top policy gets enacted."))
-    if (Game.signups[channel][1].failedElections == 3){
-      var topDeck = Game.signups[channel][1].policy.shift();
-      Game.signups[channel][1].failedElections = 0;
+    Game[channel].failedElections++;
+    client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Failed Election").addField("Elections Failed","**" + Game[channel].failedElections + " / 3** Failed Election in a row before the top policy gets enacted."))
+    if (Game[channel].failedElections == 3){
+      var topDeck = Game[channel].policy["Deck"].shift();
+      Game[channel].failedElections = 0;
       if (topDeck == "Fascist"){
         passedFascist(channel,true)
       }
@@ -801,132 +315,288 @@ function everyoneVoted(channel){
 
 function nextRound(channel){
   //[ID | Role | Alignment | Termlocked | President/Chancellor | Ja/Nien/Maybe]
-  Game.signups[channel][1].inOffice = []
+  Game[channel].policy["InOffice"] = []
   var tru = false;
-  for (var i = 0; i<Game.signups[channel][1].players.length;i++){
-    if (Game.signups[channel][1].players[i].office == "President" && !tru){
-      if (i == Game.signups[channel][1].players.length-1){
-        Game.signups[channel][1].players[0].office = "President";
-        Game.signups[channel][1].players[i].office = false;
-        client.channels.cache.get(Game.signups[channel][0][0]).send("<@"+Game.signups[channel][1].players[0].id + "> is now president.")
-      }
-      else {
-        Game.signups[channel][1].players[i].office = false;
-        Game.signups[channel][1].players[i+1].office = "President";
-        client.channels.cache.get(Game.signups[channel][0][0]).send("<@"+Game.signups[channel][1].players[parseInt(i+1)].id+"> is now president.")
-      }
-    tru = true;      
-    }
-  }
-  //---------------Erase Prev Pres & Chance
-  for (var i in Game.signups[channel][1].players){
-    if (Game.signups[channel][1].players[i].office != "President"){
-      Game.signups[channel][1].players[i].office = false
-    }
-  }
-  //---------------Shuffle Deck------------------
-  //client.channels.cache.get(Game.signups[channel][0][0]).send(Game.signups[channel][1].policy)
-  if (Game.signups[channel][1].policy.length < 3){
-     shuffleDeck(channel)
-  }
-}
-
-
-function Government(){
-  this.policy = [];
-  this.discarded = [];
-  
-  this.inOffice = [];
-  this.failedElections = 0;
-  
-  this.liberal = 0;
-  this.fascist = 0;
-  
-  this.players = [];
-}
-
-function Player(id, role){
-  this.id = id;
-
-  this.secretRole = role;
-  if (role == "Liberal"){
-    this.partyMembership = "Liberal";
+  var index = Game[channel].alive.indexOf(Game[channel].office["President"])
+  if (index == Game[channel].alive.length-1){
+    Game[channel].office["President"] = Game[channel].alive[0]
   }
   else {
-    this.partyMembership = "Fascist";
+    Game[channel].office["President"] = Game[channel].alive[index+1]
   }
-  
-  this.alive = true;
-  this.office = null;
-  
-  this.vote = "nein"
-  
+  client.channels.cache.get(Game[channel].channel).send("<@"+Game[channel].office["President"] + "> is now president.")
+  //---------------Erase Prev Pres & Chance
+  Game[channel].office["Chancellor"] = null
+  //---------------Shuffle Deck------------------
+  if (Game[channel].policy["Deck"].length < 3){
+     shuffleDeck(channel)
+  }
+  updateDB(Game[channel].id, JSON.stringify({"Office":Game[channel].office}))
 }
 
 function shuffleDeck(channel){
-    while (Game.signups[channel][1].policy.length != 0){
-      Game.signups[channel][1].discarded.push(Game.signups[channel][1].policy[0])
-      Game.signups[channel][1].policy.splice(0,1)
+    while (Game[channel].policy["Deck"].length != 0){
+     Game[channel].policy["Discard"].push(Game[channel].policy["Deck"][0])
+      Game[channel].policy["Deck"].splice(0,1)
     }
-    while (Game.signups[channel][1].discarded.length != 0){
-      var index = Math.floor(Math.random()*Game.signups[channel][1].discarded.length)
-      Game.signups[channel][1].policy.push(Game.signups[channel][1].discarded[index])
-      Game.signups[channel][1].discarded.splice(index,1)
+    while (Game[channel].policy["Discard"].length != 0){
+      var index = Math.floor(Math.random()*Game[channel].policy["Discard"].length)
+      Game[channel].policy["Deck"].push(Game[channel].policy["Discard"][index])
+      Game[channel].policy["Discard"].splice(index,1)
     }
     var libCards = 0;
     var fasCards = 0;
-    for (var x in Game.signups[channel][1].policy){
-      if (Game.signups[channel][1].policy[x] == "Liberal"){
+    for (var x in Game[channel].policy["Deck"]){
+      if (Game[channel].policy["Deck"][x] == "Liberal"){
         libCards++;
       }
       else {
         fasCards++;
       }
     }
-    client.channels.cache.get(Game.signups[channel][0][0]).send(new Discord.MessageEmbed().setTitle("Deck Reshuffled").addField("Liberal Policies Remaining",libCards).addField("Fascist Policies Remaining",fasCards))
+    client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Deck Reshuffled").addField("Liberal Policies Remaining",libCards).addField("Fascist Policies Remaining",fasCards))
+    updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy}))
+}
+
+function passedFascist(channelIndex, topDeck = false){
+  Game[channelIndex].passed["Fascist"]++;
+  var fas = Game[channelIndex].passed["Fascist"];
+  var embed = new Discord.MessageEmbed().setTitle("A Fascist Policy has been enacted.").setColor("b22222").addField("Fascist Policies Passed","**"+Game[channelIndex].passed["Fascist"]+"/6** until Fascist Victory")
+  if (fas == 6){
+    embed.addField("The fascist party has won.")
+    endGame(channelIndex)
+  }
+  else if (topDeck == false){
+    if (fas == 4 || fas == 5){
+      embed.addField("Presidential Power","The president must execute another player.")
+      Game[channelIndex].status = "Execution"
+    }
+    else if (fas == 3 && Game[channelIndex].alive.length > 6){
+      embed.addField("Special Election","The president elect another player to be president. [WORK IN PROGRESS")
+      nextRound(channelIndex)
+    }
+    else if (fas == 3 && Game[channelIndex].alive.length < 7){
+      embed.addField("Policy Peek","The president will be shown the top 3 policies")
+      client.users.cache.get(Game[channelIndex].office["President"]).send("Here are the top three cards:\n\n"+Game[channelIndex].policy["InOffice"][0]+"\n"+Game[channelIndex].policy["InOffice"][1]+"\n"+Game[channelIndex].policy["InOffice"][2])
+      nextRound(channelIndex)
+    }
+    else if (fas == 2  && Game[channelIndex].alive.length > 6){
+      embed.addField("Investigate Loyalty","The president must investigate another player.")
+      Game[channelIndex].status = "Investigation"
+    }
+    else if (fas == 2  && Game[channelIndex].alive.length > 8){
+      embed.addField("The president must investigate another player.")
+    }
+    else {
+      nextRound(channelIndex)
+    }
+    updateDB(Game[channelIndex].id, JSON.stringify({"ActionDone":Game[channelIndex].status}))
+  }
+  else {
+    embed.addField("Top Deck","Any Executive Powers gained were lost.")
+    nextRound(channelIndex)
+  }
+  embed.setFooter("Made by MoustachioMario#2067")
+  client.channels.cache.get(Game[channelIndex].channel).send(embed)
+}
+function passedLiberal(channelIndex){
+  Game[channelIndex].passed["Liberal"]++;
+  var embed = new Discord.MessageEmbed().setTitle("A Liberal Policy has been enacted.").setColor("1167b1").addField("Liberal Policies Passed","**"+ Game[channelIndex].passed["Liberal"]+"/5** until Liberal Victory")
+  if (Game[channelIndex].passed["Liberal"] == 5){
+    embed.addField("Game Over","The Liberal party has won.")
+    endGame(channelIndex)
+  }
+  else {
+    nextRound(channelIndex)
+  }
+  embed.setFooter("Made by MoustachioMario#2067")
+  client.channels.cache.get(Game[channelIndex].channel).send(embed)
+}
+
+function printVote(channel){
+  var yes = 0;
+  var no = 0;
+  var embed = new Discord.MessageEmbed().setTitle("Votes");
+  for (var i in Game[channel].alive){
+    embed.addField(client.users.cache.get(Game[channel].alive[i]).tag,"voted " + Game[channel].votes[Game[channel].alive[i]])
+    if (Game[channel].votes[Game[channel].alive[i]] == "ja"){
+      yes++;
+    }
+    else {
+      no++;
+    }
+  }
+  if (yes<=no){
+    embed.setColor('#b22222');
+  }
+  else {
+    embed.setColor('#228b22')
+  }
+  return embed;
+}
+
+function setUpGame(message){
+  //[ID | Role | Alignment | Termlocked | President/Chancellor | Ja/Nien/Maybe]
+  //------------------------------------------------------SETTING UP-----------------------------------------------------------
+  var open = gameFromChannel(message.channel.id)
+  var gameInfo = Game[open]
+  gameInfo.roles = [];
+  //----------------------------------------------------ADDING ROLES-------------------------------------------------------
+  var rolelist = ["Hitler","Liberal"]
+  for (var i = 6; i<=gameInfo.alive.length;i++){
+    if (i == 6 || i == 8 || i == 10){
+      rolelist.push("Liberal");
+    }
+    if (i == 7 || i == 9){
+      rolelist.push("Fascist");
+    }
+  }
+  console.log(gameInfo.alive)
+  var shuffle = gameInfo.alive;
+  gameInfo.alive = [];
+  while (shuffle.length != 0){
+    var index = Math.floor(Math.random() * shuffle.length)
+    gameInfo.alive.push(shuffle[index])
+    shuffle.splice(index,1)
+  }
+  console.log(gameInfo.alive)
+  //-------------------------------------------------ASSIGNING ROLES-------------------------------------------------------
+  for (var i in gameInfo.alive){
+    var index = Math.floor(Math.random()*rolelist.length);
+    var role = rolelist[index]
+    rolelist.splice(index,1)
+    gameInfo.roles.push([gameInfo.alive[i], role])
+  }
+  //-------------------------------------------------ANNOUCING ROLES-------------------------------------------------------
+  var Fascists = []
+  for (i in gameInfo.roles){
+    console.log("roles:"+gameInfo.roles[i])
+    //FIND FASCISTS
+    if (gameInfo.roles[i][1] == "Fascist"){
+      Fascists.push(gameInfo.roles[i][0])
+    }
+    else if (gameInfo.roles[i][1] == "Hitler"){
+      Fascists.unshift(gameInfo.roles[i][0])
+    }
+  }
+  //create message
+  var mess = "```diff\nYou are a\n-Fascist\n\nYou know that " + message.guild.members.cache.get(Fascists[0]).displayName + " is Hitler.\n\nYour fellow fascists are:\n";
+  for (var i in Fascists){
+    mess += message.guild.members.cache.get(Fascists[i]).displayName + ", ";
+  }
+  //send Fascists Message
+  for (var i = 1; i < Fascists.length;i++){
+    message.guild.members.cache.get(Fascists[i]).send(mess)
+  }
+  //Send Hitler Message
+  if (Fascists.length == 2){
+    message.guild.members.cache.get(Fascists[0]).send("```diff\nYou are\n-Hitler\n\nYou know that " + message.guild.members.cache.get(Fascists[1]).displayName + " is your Fascist.\n```");
+  }
+  else {
+    message.guild.members.cache.get(Fascists[0]).send("```diff\nYou are\n-Hitler\n\nYou do not know who the fascists are.\n```")
+  }
+  //Send Liberal Messages
+  for (i in gameInfo.roles){
+    if (gameInfo.roles[i][1] == "Liberal"){
+      message.guild.members.cache.get(gameInfo.roles[i][0]).send("```diff\nYou are\n+Liberal\n```")
+    }
+  }
+  //[[CARDS][DISCARDS][FASCISTS,LIBERALS][WAITING CARDS]]
+  //----------------------------------------------------DONE ASSIGNING ROLES--------------------------------------------------
+  //Game.signups[channelIndex][2] = [[],[],[0,0],[]]
+  var setup = ["Liberal","Liberal","Liberal","Liberal","Liberal","Liberal","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist","Fascist"]
+  gameInfo.policy["Deck"] = []
+  for (var i = 0; i<setup.length;){
+    var index = Math.floor(Math.random()*setup.length)
+    gameInfo.policy["Deck"].push(setup[index])
+    setup.splice(index,1)
+  }
+  gameInfo.office["President"] = gameInfo.alive[0]
+  gameInfo.office["Chancellor"] = null
+  gameInfo.office["Special Election"] = null
+  message.channel.send(message.guild.members.cache.get(gameInfo.alive[0]).displayName + " is the President and must nominate a chancellor.");
+  console.log(gameInfo.roles) // <-- i don't need office xd i need roles office works
+  updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
 }
 
 function endGame(channel){
   console.log("present")
   var embed = new Discord.MessageEmbed()
-  for (var i in Game.signups[channel][1].players){
-    embed.addField(client.users.cache.get(Game.signups[channel][1].players[i].id).tag,Game.signups[channel][1].players[i].secretRole)
+  for (var i in Game[channel].roles){
+    embed.addField(client.users.cache.get(Game[channel].roles[i][0].id).tag,Game[channel].roles[i][1])
   }
   embed.setFooter("Made by MoustachioMario#2067")
-  client.channels.cache.get(Game.signups[channel][0][0]).send(embed)
-  Game.signups[channel][0][4] = false;
+  client.channels.cache.get(Game[channel].channel).send(embed)
+  Game[channel].status = "Signups";
 }
 
-function breakBot(channel){
-  Game.signups[10000][1].players;
-}
-*/
-function patchEvent(query = null,col=null, newValue = null){
-  if (query == null){
-    return
-  }
-  else {
-    var patchEvent = request('PATCH', process.env.DB_URL + '/' + query, {
+function createGame(channelID){
+  console.log("CREATEGAME")
+  var postEvent = request('POST', process.env.EVENTURL, {
       headers: DBHeader,
-      body : '{"'+col+'":"'+newValue+'"}'
+      body : '{"GameID":"0","ChannelID":"'+channelID+'","Alive":[]}'
     });
-    var responseBody = Buffer.from(patchEvent.body).toString();
+    var responseBody = Buffer.from(postEvent.body).toString();
     console.log(responseBody)
+    //Game["300"] = new Government(JSON.parse(responseBodY))
+}
+
+function gameFromChannel(channelID){
+  try {
+    var getEvent = request('GET', process.env.EVENTURL + '?q={"ChannelID":"'+channelID+'"}', {
+        headers: DBHeader
+      });
+    var responseBody = Buffer.from(getEvent.body).toString();
+    //console.log(responseBody)
+    return JSON.parse(responseBody)[0].GameID
+  }
+  catch (err){
+      return null;
   }
 }
 
-function getEvent(query = null){
-  if (query == null){
-    var getEvent = request('GET', process.env.DB_URL, {
+client.login(process.env.TOKEN)
+
+
+var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.KEY }
+
+var info = getEvent();
+
+function getEvent(col = null, query = null){
+  //console.log("Start")
+  if (col == null || query == null){
+    var getEvent = request('GET', process.env.EVENTURL, {
       headers: DBHeader
     });
   }
   else {
-    var getEvent = request('GET', process.env.DB_URL + '?q=' + query, {
+    var getEvent = request('GET', process.env.EVENTURL + '?q={"'+col+'":"'+query+'"}', {
       headers: DBHeader
     });
   }
   var responseBody = Buffer.from(getEvent.body).toString();
-    var gameID = JSON.parse(responseBody)[0]._id;
-    return responseBody;
+  //console.log(responseBody)
+  //db = responseBody;
+    //gameID = JSON.parse(responseBody)[0]._id;
+    //testtest = JSON.parse(responseBody)[0].testtest;
+    return responseBody
+}
+
+function updateDB(id = null, update = null){
+  if (id == null || update == null) return;
+  var patchEvent = request('PATCH', process.env.EVENTURL + '/' + id, {
+    headers: DBHeader,
+    body : update
+  });
+  var responseBody = Buffer.from(patchEvent.body).toString();
+}
+
+function postEvent(newValue = null){
+    console.log("HI")
+    var postEvent = request('POST', process.env.EVENTURL, {
+      headers: DBHeader,
+      body : '{"testtest":'+newValue+'}'
+    });
+    var responseBody = Buffer.from(postEvent.body).toString();
+    console.log(responseBody)
 }
