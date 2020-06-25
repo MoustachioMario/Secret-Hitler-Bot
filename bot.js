@@ -596,7 +596,7 @@ function createGame(channelID){
   console.log("CREATEGAME")
   var postEvent = request('POST', process.env.EVENTURL, {
       headers: DBHeader,
-      body : '{"GameID":"0","ChannelID":"'+channelID+'","Alive":[],"Policies":{"Deck":[],"Discard":[]","InOffice":[]},"ActionDone":"Signups"}}'
+      body : '{"GameID":"0","ChannelID":"'+channelID+'","Alive":[],"Policies":{"Deck":[],"Discard":[],"InOffice":[]},"ActionDone":"Signups"}}'
     });
     var responseBody = Buffer.from(postEvent.body).toString();
     //Game["300"] = new Government(JSON.parse(responseBodY))
