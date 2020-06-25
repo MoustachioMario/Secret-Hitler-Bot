@@ -154,6 +154,7 @@ client.on('message', message => {
         if (Game[open].office["President"] != message.author.id) return message.channel.send("You are not the president.")
         if (Game[open].office["Chancellor"] != null) return message.channel.send("You already nominated someone.")
         if (Game[open].alive.indexOf(chance) == -1) return message.channel.send("The person you nominated is dead or not in the game.")
+        if (Game[open].office["Term Locked"].indexOf(chance) != -1) return message.channel.send("The person you nominated is term locked!")
         Game[open].office["Chancellor"] = message.mentions.users.first().id;
         for (var i in Game[open].alive){
             Game[open].votes[Game[open].alive[i]] = "Maybe";
@@ -327,6 +328,9 @@ function everyoneVoted(channel){
       }
     }
     Game[channel].failedElections = 0;
+    Game[open].office["Term Locked"] = []
+    Game[open].office["Term Locked"].push(Game[open].office["President"])
+    Game[open].office["Term Locked"].push(Game[open].office["Chancellor"])
     client.channels.cache.get(Game[channel].channel).send("The president will now discard a card")
     Game[channel].status = "President Discarding"
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
@@ -573,6 +577,7 @@ function setUpGame(message){
   gameInfo.office["President"] = gameInfo.alive[0]
   gameInfo.office["Chancellor"] = null
   gameInfo.office["Special Election"] = null
+  gameInfo.office["Term Locked"] = []
   message.channel.send(message.guild.members.cache.get(gameInfo.alive[0]).displayName + " is the President and must nominate a chancellor.");
   console.log(gameInfo.roles) // <-- i don't need office xd i need roles office works
   updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
