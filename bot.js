@@ -266,7 +266,7 @@ client.on('message', message => {
             if (Game[args[0]].policy["InOffice"][i] == discarding && discardingComplete == false){
               message.channel.send("You have discarded a " + Game[args[0]].policy["InOffice"][i] + " policy");
               discardingComplete = true;
-              Game[args[0]].policy["Discarded"].push(Game[args[0]].policy["InOffice"][i])
+              Game[args[0]].policy["Discard"].push(Game[args[0]].policy["InOffice"][i])
               Game[args[0]].policy["InOffice"].splice(i,1)
             }
           }
