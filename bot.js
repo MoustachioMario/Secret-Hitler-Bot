@@ -601,8 +601,8 @@ function createGame(channelID){
       body : '{"GameID":"0","ChannelID":"'+channelID+'","Alive":[]}'
     });
     var responseBody = Buffer.from(postEvent.body).toString();
-    console.log(responseBody)
     //Game["300"] = new Government(JSON.parse(responseBodY))
+   load()
 }
 
 function gameFromChannel(channelID){
