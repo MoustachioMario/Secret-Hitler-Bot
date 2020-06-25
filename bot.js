@@ -10,7 +10,7 @@ client.on('ready', () => {
     client.user.setStatus('online')
 });
 
-const prefixes = ["sh.",'/'];
+const prefixes = ["test.",'/'];
 
 const GUILD = "663616368389652480";
 
@@ -112,6 +112,7 @@ client.on('message', message => {
       }
       else if (command == "load"){
           if (message.author.id == 642172417417936925){
+            console.log(Game["89"])
               load();
           }
       }
@@ -328,9 +329,11 @@ function everyoneVoted(channel){
       }
     }
     Game[channel].failedElections = 0;
-    Game[open].office["Term Locked"] = []
-    Game[open].office["Term Locked"].push(Game[open].office["President"])
-    Game[open].office["Term Locked"].push(Game[open].office["Chancellor"])
+    Game[channel].office["Term Locked"] = []
+    if (Game[channel].alive.length > 5){
+      Game[channel].office["Term Locked"].push(Game[channel].office["President"])
+    }
+    Game[channel].office["Term Locked"].push(Game[channel].office["Chancellor"])
     client.channels.cache.get(Game[channel].channel).send("The president will now discard a card")
     Game[channel].status = "President Discarding"
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
@@ -572,6 +575,7 @@ function setUpGame(message){
     gameInfo.policy["Deck"].push(setup[index])
     setup.splice(index,1)
   }
+  gameInfo.office = {}
   gameInfo.office["President"] = gameInfo.alive[0]
   gameInfo.office["Chancellor"] = null
   gameInfo.office["Special Election"] = null
@@ -596,10 +600,11 @@ function createGame(channelID){
   console.log("CREATEGAME")
   var postEvent = request('POST', process.env.EVENTURL, {
       headers: DBHeader,
-      body : '{"GameID":"88","ChannelID":"'+channelID+'","Alive":[],"Policies":{"Deck":[],"Discard":[],"InOffice":[]},"ActionDone":"Signups"}'
+      body : '{"GameID":"78","ChannelID":"'+channelID+'","Alive":[],"Policies":{"Deck":[],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0},"ActionDone":"Signups","Votes":{},"Office":{}}'
     });
-    responseBody = Buffer.from(postEvent.body).toString();
-    Game["88"] = new Government(gameFromChannel(channelID))
+    //responseBody = Buffer.from(postEvent.body).toString();
+    //console.log(responseBody)
+  load()
 }
 
 function gameFromChannel(channelID){
@@ -619,9 +624,8 @@ function gameFromChannel(channelID){
 client.login(process.env.TOKEN)
 
 
-var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.APIKEY }
+var DBHeader = { "Content-Type": "application/json; charset=utf-8", "x-apikey": process.env.KEY }
 
-var info = getEvent();
 
 function getEvent(col = null, query = null){
   //console.log("Start")
