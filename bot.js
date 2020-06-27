@@ -349,6 +349,7 @@ function everyoneVoted(channel){
     Game[channel].failedElections++;
     client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Failed Election").addField("Elections Failed","**" + Game[channel].failedElections + " / 3** Failed Election in a row before the top policy gets enacted."))
     if (Game[channel].failedElections == 3){
+        Game[channel].office["Term Locked"] = []
       var topDeck = Game[channel].policy["Deck"].shift();
       Game[channel].failedElections = 0;
       if (topDeck == "Fascist"){
