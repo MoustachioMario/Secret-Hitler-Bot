@@ -189,6 +189,7 @@ client.on('message', message => {
         client.users.cache.get(Game[open].office["President"]).send(client.users.cache.get(message.mentions.members.first().id).tag + "\'s party membership is aligned with the " + membership)
         nextRound(open);
       }
+        /*
       else if (command == "forcediscard"){
           if (message.author.id == "642172417417936925"){
              var open = gameFromChannel(message.channel.id)
@@ -206,7 +207,7 @@ client.on('message', message => {
                   client.users.cache.get(Game[open].office["Chancellor"]).send(new Discord.MessageEmbed().setTitle("Game " + open).addField("Please discard a card","1: "+Game[open].policy["InOffice"][0]+"\n2: "+Game[open].policy["InOffice"][1]))
               }
           }
-      }
+      }*/
       else if (command == "start"){
         setUpGame(message)
       }
