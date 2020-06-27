@@ -133,19 +133,6 @@ client.on('message', message => {
         }
         message.channel.send(mess + "```")
       }
-      else if (command == "president"){
-        var open = gameFromChannel(message.channel.id)
-        message.channel.send("Working " + open)
-        if (open == null){
-          message.channel.send("There is no open game here :/")
-        }
-        else {
-          console.log(Game[open].office)
-          Game[open].office["President"] = message.mentions.users.first().id;
-          Game[open].office["Chancellor"] = null;
-          }
-          updateDB(Game[open].id, JSON.stringify({"Office":Game[open].office}))
-      }
       else if (command == "nominate"){
         var chance = message.mentions.users.first().id;
         var open = gameFromChannel(message.channel.id)
@@ -202,7 +189,24 @@ client.on('message', message => {
         client.users.cache.get(Game[open].office["President"]).send(client.users.cache.get(message.mentions.members.first().id).tag + "\'s party membership is aligned with the " + membership)
         nextRound(open);
       }
-    
+      else if (command == "forcediscard"){
+          if (message.author.id == "642172417417936925"){
+             var open = gameFromChannel(message.channel.id)
+             var random = Math.floor(Math.random() * Game[open].policy["InOffice"].length))
+             Game[open].policy["InOffice"].splice(random,1)
+              if (Game[open].policy["InOffice"].length == 1){
+                  if (Game[open].policy["InOffice"][0] == "Liberal"){
+                      passedLiberal(open)
+                  }
+                  else {
+                      passedFascist(open)
+                  }
+              }
+              else if (Game[open].policy["InOffice"].length == 2){
+                  client.users.cache.get(Game[open].office["Chancellor"]).send(new Discord.MessageEmbed().setTitle("Game " + open).addField("Please discard a card","1: "+Game[open].policy["InOffice"][0]+"\n2: "+Game[open].policy["InOffice"][1]))
+              }
+          }
+      }
       else if (command == "start"){
         setUpGame(message)
       }
