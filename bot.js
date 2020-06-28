@@ -479,7 +479,7 @@ function passedFascist(channelIndex, topDeck = false){
     embed.addField("Top Deck","Any Executive Powers gained were lost.")
     nextRound(channelIndex)
   }
-  embed.setFooter("Made by MoustachioMario#2067")
+  embed.setFooter(addFooter())
   client.channels.cache.get(Game[channelIndex].channel).send(embed)
 }
 function passedLiberal(channelIndex){
@@ -492,7 +492,7 @@ function passedLiberal(channelIndex){
   else {
     nextRound(channelIndex)
   }
-  embed.setFooter("Made by MoustachioMario#2067")
+  embed.setFooter(addFooter())
   client.channels.cache.get(Game[channelIndex].channel).send(embed)
 }
 
@@ -607,7 +607,7 @@ function endGame(channel){
   for (var i in Game[channel].roles){
     embed.addField(client.users.cache.get(Game[channel].roles[i][0].id).tag,Game[channel].roles[i][1])
   }
-  embed.setFooter("Made by MoustachioMario#2067")
+  embed.setFooter(addFooter())
   client.channels.cache.get(Game[channel].channel).send(embed)
   Game[channel].status = "Signups";
 }
@@ -680,4 +680,16 @@ function postEvent(newValue = null){
     });
     var responseBody = Buffer.from(postEvent.body).toString();
     console.log(responseBody)
+}
+
+function addFooter(){
+    var footers = [
+        "Consider Donating! `sh.donate`",
+        "Is your friend a fascist?",
+        "I don't hear enough arguing",
+        "[Insert Message Here]",
+        "DON'T SHOOT",
+        "You shot hitler!"
+    ]
+    return footers[Math.floor(Math.random() * footers.length)] + " | Made by MoustachioMario#2067" 
 }
