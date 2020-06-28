@@ -67,7 +67,9 @@ client.on('message', message => {
       else if (command == "pong"){
         message.channel.send("sh.ping")
       }
-
+      else if (command == "donate"){
+          message.channel.send(new Discord.MessageEmbed().setTitle("Donate!").setDescription("[Please Consider Donating!](https://www.patreon.com/MoustachioMario)"))
+      }
       else if (command == "in"){
         var open = gameFromChannel(message.channel.id)
         if (open == null){
