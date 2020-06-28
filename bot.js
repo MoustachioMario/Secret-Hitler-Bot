@@ -563,14 +563,14 @@ function setUpGame(message){
     }
   }
   //create message
-  for (var i = 1;i < Fascists.length;i++){
+  for (var i = 1; i < Fascists.length;i++){
       var mess = new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are a Fascist").addField("Hitler","You know that " + client.users.cache.get(Fascists[0]).tag + " is Hitler.")
       for (var x = 1;x < Fascists.length;x++){
           if (x != i){
               mess.addField("Ally",client.users.cache.get(Fascists[i]).tag)
           }
       }
-      .addField("Goals","Pass 6 Fascist Policies\nElect Hitler as Chancellor after 3 Fascist Policies have been passed").setColor("#b22222")
+      mess.addField("Goals","Pass 6 Fascist Policies\nElect Hitler as Chancellor after 3 Fascist Policies have been passed").setColor("#b22222")
       client.users.cache.get(Fascists[i]).send(mess)
   }
   //Send Hitler Message
