@@ -211,7 +211,7 @@ client.on('message', message => {
       else if (command == "board"){
          var open = gameFromChannel(message.channel.id)
          if (open == null) return message.react("❌");
-          var embed = new Discord.MessageEmbed().setTitle("Board").addField("Liberals","**"+Game[open].passed["Liberal"]+"/5** until Liberal Victory").addField("Fascists","**"+Game[open].passed["Fascist"]+"/6** until Fascist Victory")
+          var embed = new Discord.MessageEmbed().setTitle("Board").addField("Liberals","**"+Game[open].passed["Liberal"]+"/5** until Liberal Victory").addField("Fascists","**"+Game[open].passed["Fascist"]+"/6** until Fascist Victory").setFooter(addFooter())
           if (Game[open].passed["Liberal"] >= Game[open].passed["Fascist"]){
              embed.setColor("1167b1");
           }
@@ -295,7 +295,7 @@ client.on('message', message => {
         }
         updateDB(Game[args[0]].id, JSON.stringify({"Policies":Game[args[0]].policy}))
         if (Game[args[0]].policy["InOffice"].length == 2){
-                  client.users.cache.get(Game[args[0]].office["Chancellor"]).send(new Discord.MessageEmbed().setTitle("Game " + args[0]).addField("Please discard a card","1: "+Game[args[0]].policy["InOffice"][0]+"\n2: "+Game[args[0]].policy["InOffice"][1]))
+                  client.users.cache.get(Game[args[0]].office["Chancellor"]).send(new Discord.MessageEmbed().setTitle("Game " + args[0]).addField("Please discard a card","1: "+Game[args[0]].policy["InOffice"][0]+"\n2: "+Game[args[0]].policy["InOffice"][1]).setFooter(addFooter()))
         }
         if (Game[args[0]].policy["InOffice"].length == 1){
           if (Game[args[0]].policy["InOffice"][0] == "Liberal"){
@@ -339,7 +339,7 @@ function everyoneVoted(channel){
   if (ja > nein){
     for (var i in Game[channel].roles){
       if (Game[channel].roles[i][0] == Game[channel].office["Chancellor"] && Game[channel].roles[i][0] == "Hitler" && Game[channel].passed["Fascist"] >= 3){
-        client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Fascists win").setColor('b22222').addField("Game Over","Hitler was elected as chancellor after 3 fascist policies were passed."))
+        client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Fascists win").setColor('b22222').addField("Game Over","Hitler was elected as chancellor after 3 fascist policies were passed.").setFooter(addFooter()))
         //return endGame(channel)
       }
     }
