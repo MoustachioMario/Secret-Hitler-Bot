@@ -380,9 +380,7 @@ function everyoneVoted(channel){
 }
 
 function pendingVotes(player){
-    console.log("GATE TWO")
   var embed = new Discord.MessageEmbed().setTitle("Pending Actions");
-    console.log("GATE ONE")
   for (var i in Game){
       console.log(i)
      if (Game[i].votes[player] == "Maybe"){
@@ -395,6 +393,7 @@ function pendingVotes(player){
       embed.addField("Game " + i, "You need to discard a card:\n1: "+Game[i].policy["InOffice"][0]+"\n2: "+Game[i].policy["InOffice"][1])
      }
   }
+  embed.setFooter(addFooter())
   return embed;
 }
 
