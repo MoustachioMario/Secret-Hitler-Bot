@@ -350,7 +350,9 @@ function everyoneVoted(channel){
     if (Game[channel].alive.length > 5){
       Game[channel].office["Term Locked"].push(Game[channel].office["President"])
     }
-    Game[channel].office["Term Locked"].push(Game[channel].office["Chancellor"])
+    if (Game[channel].alive.length > 5){
+      Game[channel].office["Term Locked"].push(Game[channel].office["Chancellor"])
+    }
     client.channels.cache.get(Game[channel].channel).send("The president will now discard a card")
     Game[channel].status = "President Discarding"
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
@@ -525,7 +527,7 @@ function setUpGame(message){
   var gameInfo = Game[open]
   gameInfo.roles = [];
   //----------------------------------------------------ADDING ROLES-------------------------------------------------------
-  var rolelist = ["Hitler","Fascist","Fascist"]
+  var rolelist = ["Hitler","Fascist","Liberal","Liberal","Liberal"]
   for (var i = 6; i<=gameInfo.alive.length;i++){
     if (i == 6 || i == 8 || i == 10){
       rolelist.push("Liberal");
