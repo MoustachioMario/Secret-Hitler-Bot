@@ -525,7 +525,7 @@ function setUpGame(message){
   var gameInfo = Game[open]
   gameInfo.roles = [];
   //----------------------------------------------------ADDING ROLES-------------------------------------------------------
-  var rolelist = ["Hitler","Fascist"]
+  var rolelist = ["Hitler","Fascist","Fascist"]
   for (var i = 6; i<=gameInfo.alive.length;i++){
     if (i == 6 || i == 8 || i == 10){
       rolelist.push("Liberal");
