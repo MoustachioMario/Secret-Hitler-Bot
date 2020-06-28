@@ -525,7 +525,7 @@ function setUpGame(message){
   var gameInfo = Game[open]
   gameInfo.roles = [];
   //----------------------------------------------------ADDING ROLES-------------------------------------------------------
-  var rolelist = ["Hitler","Liberal"]
+  var rolelist = ["Hitler","Fascist"]
   for (var i = 6; i<=gameInfo.alive.length;i++){
     if (i == 6 || i == 8 || i == 10){
       rolelist.push("Liberal");
@@ -563,7 +563,7 @@ function setUpGame(message){
     }
   }
   //create message
-  var mess = new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are a Fascist").addField("Allies","You know that " + client.users.cache.get(Fascists[0]).tag + " is Hitler.").addField("Goal","Pass 6 Fascist Policies\nOR\Elect Hitler as Chancellor after 3 Fascist Policies have been passed").setColor("#b22222")
+  var mess = new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are a Fascist").addField("Allies","You know that " + client.users.cache.get(Fascists[0]).tag + " is Hitler.").addField("Goals","Pass 6 Fascist Policies\nElect Hitler as Chancellor after 3 Fascist Policies have been passed").setColor("#b22222")
   for (var i in Fascists){
     mess.addField("Ally",message.guild.members.cache.get(Fascists[i]).tag)
   }
@@ -573,15 +573,15 @@ function setUpGame(message){
   }
   //Send Hitler Message
   if (Fascists.length == 2){
-    message.guild.members.cache.get(Fascists[0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are Hitler").addField("Allies","You know that " + client.users.cache.get(Fascists[1]).tag + " is your fellow fascist.").addField("Goal","Pass 6 Fascist Policies\nOR\nBecome Chancellor after 3 Fascist Policies have been passed").setColor("#b22222"))
+    message.guild.members.cache.get(Fascists[0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are Hitler").addField("Allies","You know that " + client.users.cache.get(Fascists[1]).tag + " is your fellow fascist.").addField("Goals","Pass 6 Fascist Policies\nBecome Chancellor after 3 Fascist Policies have been passed").setColor("#b22222"))
   }
   else {
-    message.guild.members.cache.get(Fascists[0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are Hitler").addField("Allies","You do not know who the other fascists are.").addField("Goal","Pass 6 Fascist Policies\nOR\nBecome Chancellor after 3 Fascist Policies have been passed").setColor("#b22222"))
+    message.guild.members.cache.get(Fascists[0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are Hitler").addField("Allies","You do not know who the other fascists are.").addField("Goals","Pass 6 Fascist Policies\nBecome Chancellor after 3 Fascist Policies have been passed").setColor("#b22222"))
   }
   //Send Liberal Messages
   for (i in gameInfo.roles){
     if (gameInfo.roles[i][1] == "Liberal"){
-      message.guild.members.cache.get(gameInfo.roles[i][0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are a Liberal").addField("Goal","Pass 5 Liberal Policies\nOR\nExecute Hitler").setColor("#1167b1"))
+      message.guild.members.cache.get(gameInfo.roles[i][0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are a Liberal").addField("Goals","Pass 5 Liberal Policies\nExecute Hitler").setColor("#1167b1"))
     }
   }
   //----------------------------------------------------DONE ASSIGNING ROLES--------------------------------------------------
