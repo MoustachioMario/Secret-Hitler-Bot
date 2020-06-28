@@ -606,7 +606,7 @@ function endGame(channel){
   console.log("present")
   var embed = new Discord.MessageEmbed()
   for (var i in Game[channel].roles){
-    embed.addField(client.users.cache.get(Game[channel].roles[i][0].id).tag,Game[channel].roles[i][1])
+    embed.addField(client.users.cache.get(Game[channel].roles[i][0]).tag,Game[channel].roles[i][1])
   }
   embed.setFooter(addFooter())
   client.channels.cache.get(Game[channel].channel).send(embed)
