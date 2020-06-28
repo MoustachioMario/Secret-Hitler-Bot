@@ -544,7 +544,6 @@ function setUpGame(message){
     gameInfo.alive.push(shuffle[index])
     shuffle.splice(index,1)
   }
-  console.log(gameInfo.alive)
   //-------------------------------------------------ASSIGNING ROLES-------------------------------------------------------
   for (var i in gameInfo.alive){
     var index = Math.floor(Math.random()*rolelist.length);
@@ -601,7 +600,14 @@ function setUpGame(message){
   gameInfo.office["Chancellor"] = null
   gameInfo.office["Special Election"] = null
   gameInfo.office["Term Locked"] = []
-  message.channel.send(message.guild.members.cache.get(gameInfo.alive[0]).displayName + " is the President and must nominate a chancellor.");
+var turnOrder = new Discord.MessageEmbed().setTitle("Turn Order")
+var mess = ""
+for (var i in gameInfo.alive){
+    mess += "<@" + gameInfo.alive[i] + ">\n"
+}
+    turnOrder.addField("Turn Order",mess)
+    turnOrder.addField("Game Start",message.guild.members.cache.get(gameInfo.alive[0]).displayName + " is the President and must nominate a chancellor.")
+  message.channel.send(turnOrder);
   console.log(gameInfo.roles) // <-- i don't need office xd i need roles office works
   updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
 }
