@@ -208,6 +208,18 @@ client.on('message', message => {
               }
           }
       }*/
+      else if (command == "board"){
+         var open = gameFromChannel(message.channel.id)
+         if (open == null) return message.react("❌");
+          var embed = new Discord.MessageEmbed().setTitle("Board").addField("Liberals","**"+Game[channelIndex].passed["Liberal"]+"/5** until Liberal Victory").addField("Fascists","**"+Game[channelIndex].passed["Fascist"]+"/6** until Fascist Victory")
+          if (Game[channelIndex].passed["Liberal"] >= Game[channelIndex].passed["Fascist"]){
+             embed.setColor("1167b1");
+          }
+          else {
+             embed.setColor("#b22222");
+          }
+         message.channel.send(embed);
+      }
       else if (command == "start"){
         setUpGame(message)
       }
