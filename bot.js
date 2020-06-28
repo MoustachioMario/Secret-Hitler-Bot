@@ -563,9 +563,9 @@ function setUpGame(message){
     }
   }
   //create message
-  var mess = "```diff\nYou are a\n-Fascist\n\nYou know that " + message.guild.members.cache.get(Fascists[0]).displayName + " is Hitler.\n\nYour fellow fascists are:\n";
+  var mess = new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are a Fascist").addField("Allies","You know that " + client.users.cache.get(Fascists[0]).tag + " is Hitler.").addField("Goal","Pass 6 Fascist Policies\nOR\Elect Hitler as Chancellor after 3 Fascist Policies have been passed").setColor("#b22222")
   for (var i in Fascists){
-    mess += message.guild.members.cache.get(Fascists[i]).displayName + ", ";
+    mess.addField("Ally",message.guild.members.cache.get(Fascists[i]).tag)
   }
   //send Fascists Message
   for (var i = 1; i < Fascists.length;i++){
@@ -573,15 +573,15 @@ function setUpGame(message){
   }
   //Send Hitler Message
   if (Fascists.length == 2){
-    message.guild.members.cache.get(Fascists[0]).send("```diff\nYou are\n-Hitler\n\nYou know that " + message.guild.members.cache.get(Fascists[1]).displayName + " is your Fascist.\n```");
+    message.guild.members.cache.get(Fascists[0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are Hitler").addField("Allies","You know that " + client.users.cache.get(Fascists[1]).tag + " is your fellow fascist.").addField("Goal","Pass 6 Fascist Policies\nOR\nBecome Chancellor after 3 Fascist Policies have been passed").setColor("#b22222"))
   }
   else {
-    message.guild.members.cache.get(Fascists[0]).send("```diff\nYou are\n-Hitler\n\nYou do not know who the fascists are.\n```")
+    message.guild.members.cache.get(Fascists[0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are Hitler").addField("Allies","You do not know who the other fascists are.").addField("Goal","Pass 6 Fascist Policies\nOR\nBecome Chancellor after 3 Fascist Policies have been passed").setColor("#b22222"))
   }
   //Send Liberal Messages
   for (i in gameInfo.roles){
     if (gameInfo.roles[i][1] == "Liberal"){
-      message.guild.members.cache.get(gameInfo.roles[i][0]).send("```diff\nYou are\n+Liberal\n```")
+      message.guild.members.cache.get(gameInfo.roles[i][0]).send(new Discord.MessageEmbed().setTitle("Rolecard").setDescription("A game has started in <#" + message.channel.id + ">!").addField("Secret Role","You are a Liberal").addField("Goal","Pass 5 Liberal Policies\nOR\nExecute Hitler").setColor("#1167b1"))
     }
   }
   //----------------------------------------------------DONE ASSIGNING ROLES--------------------------------------------------
