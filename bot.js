@@ -213,7 +213,7 @@ client.on('message', message => {
       else if (command == "board"){
          var open = gameFromChannel(message.channel.id)
          if (open == null) return message.react("❌");
-          var embed = new Discord.MessageEmbed().setTitle("Board").addField("Liberals","**"+Game[open].passed["Liberal"]+"/5** until Liberal Victory").addField("Fascists","**"+Game[open].passed["Fascist"]+"/6** until Fascist Victory").setFooter(addFooter())
+          var embed = new Discord.MessageEmbed().setTitle("Board").addField("Liberals","**"+Game[open].passed["Liberal"]+"/5** until Liberal Victory").addField("Fascists","**"+Game[open].passed["Fascist"]+"/6** until Fascist Victory").addField("Cards Remaining",Game[open].policy["Deck"].length).setFooter(addFooter())
           if (Game[open].passed["Liberal"] >= Game[open].passed["Fascist"]){
              embed.setColor("1167b1");
           }
