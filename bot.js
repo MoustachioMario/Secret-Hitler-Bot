@@ -340,9 +340,9 @@ function everyoneVoted(channel){
   client.channels.cache.get(Game[channel].channel).send(printVote(channel))
   if (ja > nein){
     for (var i in Game[channel].roles){
-      if (Game[channel].roles[i][0] == Game[channel].office["Chancellor"] && Game[channel].roles[i][0] == "Hitler" && Game[channel].passed["Fascist"] >= 3){
+      if (Game[channel].roles[i][0] == Game[channel].office["Chancellor"] && Game[channel].roles[i][1] == "Hitler" && Game[channel].passed["Fascist"] >= 3){
         client.channels.cache.get(Game[channel].channel).send(new Discord.MessageEmbed().setTitle("Fascists win").setColor('b22222').addField("Game Over","Hitler was elected as chancellor after 3 fascist policies were passed.").setFooter(addFooter()))
-        //return endGame(channel)
+        return endGame(channel)
       }
     }
     Game[channel].failedElections = 0;
