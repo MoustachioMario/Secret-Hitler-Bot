@@ -432,6 +432,7 @@ function nextRound(channel, specialElection = false){
           }
           Game[channel].office["Special Election"] = null
       }
+      //---------------------------------------------------
       if (index >= Game[channel].alive.length-1){
         Game[channel].office["President"] = Game[channel].alive[0]
       }
@@ -643,7 +644,7 @@ for (var i in gameInfo.alive){
     turnOrder.addField("Game Start",message.guild.members.cache.get(gameInfo.alive[0]).displayName + " is the President and must nominate a chancellor.")
   message.channel.send(turnOrder);
   console.log(gameInfo.roles) // <-- i don't need office xd i need roles office works
-  updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
+  updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"Alive":gameInfo.alive,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
 }
 
 function endGame(channel){
