@@ -168,7 +168,7 @@ client.on('message', message => {
         if (Game[open].office["President"] != message.author.id) return message.reply(" you are not the president")
         if (Game[open].alive.indexOf(message.mentions.members.first().id) == -1) return message.reply(" the person you attempted to shoot is already dead, or not in the game!")
         Game[open].alive.splice(Game[open].alive.indexOf(message.mentions.members.first().id),1)
-        message.channel.send("The president has executed "+client.users.cache.get(message.mentions.members.first())+".")
+        message.channel.send("The president has executed "+client.users.cache.get(message.mentions.members.first().id)+".")
         for (var i in Game[open].roles){
           if (Game[open].roles[i][0] == message.mentions.members.first().id){
             if (Game[open].roles[i][1] == "Hitler"){
@@ -180,13 +180,21 @@ client.on('message', message => {
         message.channel.send("They were not hitler.")
         nextRound(open);
       }
+      else if (command == "se" || command == "special"){
+        var open = gameFromChannel(message.channel.id)
+        if (Game[open].status != "Special Election") return message.channel.send("There are no scheduled special elections at this moment.")
+        if (Game[open].office["President"] != message.author.id) return message.reply(" you are not the president")
+        if (Game[open].alive.indexOf(message.mentions.members.first().id) == -1) return message.reply(" the person you attempted to elect is already dead, or not in the game!")
+        message.channel.send("The president has elected "+client.users.cache.get(message.mentions.members.first().id).tag+".")
+        nextRound(open, message.mentions.members.first().id);
+      }
       else if (command == "investigate" || command == "inv"){
         var open = gameFromChannel(message.channel.id)
         if (Game[open].status != "Investigation") return message.channel.send("There are no scheduled investigations at this moment.")
         if (Game[open].office["President"] != message.author.id) return message.reply(" you are not the president")
         if (Game[open].alive.indexOf(message.mentions.members.first().id) == -1) return message.reply(" the person you attempted to investigate is not in the game!")
         Game[open].alive.splice(Game[open].alive.indexOf(message.mentions.members.first().id),1)
-        message.channel.send("The president has investigated "+client.users.cache.get(message.mentions.members.first())+".")
+        message.channel.send("The president has investigated "+client.users.cache.get(message.mentions.members.first().id)+".")
         var membership = null
         for (var i in Game[open].roles){
           if (Game[open].roles[i][0] == message.mentions.members.first().id){
@@ -409,18 +417,32 @@ function pendingVotes(player){
   return embed;
 }
 
-function nextRound(channel){
+function nextRound(channel, specialElection = false){
   //[ID | Role | Alignment | Termlocked | President/Chancellor | Ja/Nien/Maybe]
   Game[channel].policy["InOffice"] = []
-  var tru = false;
-  var index = Game[channel].alive.indexOf(Game[channel].office["President"])
-  if (index == Game[channel].alive.length-1){
-    Game[channel].office["President"] = Game[channel].alive[0]
+  if (specialElection == false){
+      if (Game[channel].office["Special Election"] != null){
+        var index = Game[channel].alive.indexOf(Game[channel].office["President"])
+      }
+      else {
+          var index = Game[channel].alive.indexOf(Game[channel].office["Special Election"][0])
+          if (index == -1){
+              index = parseInt(Game[channel].office["Special Election"][1] - 1);
+          }
+          Game[channel].office["Special Election"] = null
+      }
+      if (index >= Game[channel].alive.length-1){
+        Game[channel].office["President"] = Game[channel].alive[0]
+      }
+      else {
+        Game[channel].office["President"] = Game[channel].alive[index+1]
+      }
+      client.channels.cache.get(Game[channel].channel).send("<@"+Game[channel].office["President"] + "> is now president.")
   }
   else {
-    Game[channel].office["President"] = Game[channel].alive[index+1]
+    Game[channel].office["President"] = specialElection;
+    client.channels.cache.get(Game[channel].channel).send("<@"+ specialElection + "> is now president.")
   }
-  client.channels.cache.get(Game[channel].channel).send("<@"+Game[channel].office["President"] + "> is now president.")
   //---------------Erase Prev Pres & Chance
   Game[channel].office["Chancellor"] = null
   //---------------Shuffle Deck------------------
@@ -468,8 +490,8 @@ function passedFascist(channelIndex, topDeck = false){
       Game[channelIndex].status = "Execution"
     }
     else if (fas == 3 && Game[channelIndex].alive.length > 6){
-      embed.addField("Special Election","The president elect another player to be president. [WORK IN PROGRESS")
-      nextRound(channelIndex)
+      embed.addField("Special Election","The president elect another player to be president.")
+      Game[channelIndex].status = "Special Election"
     }
     else if (fas == 3 && Game[channelIndex].alive.length < 7){
       embed.addField("Policy Peek","The president will be shown the top 3 policies")
