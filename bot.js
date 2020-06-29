@@ -186,6 +186,7 @@ client.on('message', message => {
         if (Game[open].office["President"] != message.author.id) return message.reply(" you are not the president")
         if (Game[open].alive.indexOf(message.mentions.members.first().id) == -1) return message.reply(" the person you attempted to elect is already dead, or not in the game!")
         message.channel.send("The president has elected "+client.users.cache.get(message.mentions.members.first().id).tag+".")
+        Game[open].office["Special Election"] = [message.author.id, Game[open].alive.indexOf(message.author.id)]
         nextRound(open, message.mentions.members.first().id);
       }
       else if (command == "investigate" || command == "inv"){
