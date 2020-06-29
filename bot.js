@@ -118,22 +118,32 @@ client.on('message', message => {
               load();
           }
       }
-      else if (command == "votecount" || command == "vc"){
+      else if (command == "votecount" || command == "vc" || command == "state"){
         var channelIndex = gameFromChannel(message.channel.id);
         if (channelIndex == null) return message.channel.send("There is no game in this channel.")
-        var mess = "```\n"
+        var mess = new Discord.MessageEmbed().setTitle("You are waiting on:")
         for (var i in Game[channelIndex].votes){
             if (Game[channelIndex].votes[i] == "Maybe"){
-                mess += client.users.cache.get(i).tag + " has not voted yet.\n"
+                mess.addField("Missing Vote","<@" + i + "> has not voted yet!")
             }
             else if (Game[channelIndex].office["President"] == i && Game[channelIndex].policy["InOffice"].length == 3){
-                 mess += client.users.cache.get(i).tag + " needs to discard a policy.\n"
+                 mess.addField("Missing Discard","President <@" + i + "> needs to discard a policy!")
             }
             else if (Game[channelIndex].office["Chancellor"] == i && Game[channelIndex].policy["InOffice"].length == 2){
-              mess += client.users.cache.get(i).tag + " needs to discard a policy.\n"
+                 mess.addField("Missing Discard","Chancellor <@" + i + "> needs to discard a policy!")
+            }
+            else if (Game[channelIndex].office["President"] == i && Game[channelIndex].office["Chancellor"] == null){
+                 mess.addField("Missing Nominatation","President <@" + i + "> needs to nominate a chancellor!")
+            }
+            else if (Game[channelIndex].office["President"] == i && Game[channelIndex].status == "Execution"){
+                 mess.addField("Missing Execution","President <@" + i + "> needs to execute a player!")
+            }
+            else if (Game[channelIndex].office["President"] == i && Game[channelIndex].status == "Investigation"){
+                 mess.addField("Missing Execution","President <@" + i + "> needs to investigate a player!")
             }
         }
-        message.channel.send(mess + "```")
+        mess.setFooter(addFooter())
+        message.channel.send(mess)
       }
       else if (command == "nominate"){
         var chance = message.mentions.users.first().id;
