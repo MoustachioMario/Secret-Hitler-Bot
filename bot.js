@@ -421,7 +421,7 @@ function nextRound(channel, specialElection = false){
   //[ID | Role | Alignment | Termlocked | President/Chancellor | Ja/Nien/Maybe]
   Game[channel].policy["InOffice"] = []
   if (specialElection == false){
-      if (Game[channel].office["Special Election"] != null){
+      if (Game[channel].office["Special Election"] == null){
         var index = Game[channel].alive.indexOf(Game[channel].office["President"])
       }
       else {
