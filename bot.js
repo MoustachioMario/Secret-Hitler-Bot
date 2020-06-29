@@ -444,13 +444,14 @@ function nextRound(channel, specialElection = false){
     Game[channel].office["President"] = specialElection;
     client.channels.cache.get(Game[channel].channel).send("<@"+ specialElection + "> is now president.")
   }
+   Game[channel].status = "Nomination"
   //---------------Erase Prev Pres & Chance
   Game[channel].office["Chancellor"] = null
   //---------------Shuffle Deck------------------
   if (Game[channel].policy["Deck"].length < 3){
      shuffleDeck(channel)
   }
-  updateDB(Game[channel].id, JSON.stringify({"Office":Game[channel].office}))
+  updateDB(Game[channel].id, JSON.stringify({"Office":Game[channel].office,"ActionDone":"Nomination"}))
 }
 
 function shuffleDeck(channel){
