@@ -326,7 +326,7 @@ client.on('message', message => {
             passedFascist(args[0])
           }
           Game[args[0]].policy["InOffice"] = []
-          updateDB(Game[args[0]].id, JSON.stringify({"Passed":Game[args[0]].passed,"Policies":Game[channel].policy}))
+          updateDB(Game[args[0]].id, JSON.stringify({"Passed":Game[args[0]].passed,"Policies":Game[args[0]].policy}))
         }
       }
     }
