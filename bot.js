@@ -194,7 +194,6 @@ client.on('message', message => {
         if (Game[open].status != "Investigation") return message.channel.send("There are no scheduled investigations at this moment.")
         if (Game[open].office["President"] != message.author.id) return message.reply(" you are not the president")
         if (Game[open].alive.indexOf(message.mentions.members.first().id) == -1) return message.reply(" the person you attempted to investigate is not in the game!")
-        Game[open].alive.splice(Game[open].alive.indexOf(message.mentions.members.first().id),1)
         message.channel.send("The president has investigated "+client.users.cache.get(message.mentions.members.first().id)+".")
         var membership = null
         for (var i in Game[open].roles){
