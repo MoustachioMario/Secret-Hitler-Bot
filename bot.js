@@ -68,12 +68,12 @@ client.on('message', message => {
         message.channel.send("sh.ping")
       }
       else if (command == "donate"){
-          message.channel.send(new Discord.MessageEmbed().setTitle("Donate!").setDescription("[Please Consider Donating!](https://www.patreon.com/MoustachioMario)"))
+          message.channel.send(new Discord.MessageEmbed().setTitle("Donate!").setDescription("[Please Consider Donating!](https:/www.patreon.com/MoustachioMario)"))
       }
       else if (command == "in"){
         var open = gameFromChannel(message.channel.id)
         if (open == null){
-          message.channel.send("There is no open game here :/")
+          //message.channel.send("There is no open game here :/")
         }
         else if (Game[open].alive.indexOf(message.author.id) != -1){
           message.channel.send("You\'ve already joined!")
