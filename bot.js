@@ -560,6 +560,9 @@ function setUpGame(message){
   //------------------------------------------------------SETTING UP-----------------------------------------------------------
   var open = gameFromChannel(message.channel.id)
   var gameInfo = Game[open]
+  if (gameInfo.signups.length < 5){
+      return message.channel.send("Not Enough Players!");
+  }
   gameInfo.roles = [];
   //----------------------------------------------------ADDING ROLES-------------------------------------------------------
   var rolelist = ["Hitler","Fascist","Liberal","Liberal","Liberal"]
