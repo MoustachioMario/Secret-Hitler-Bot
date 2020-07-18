@@ -5,6 +5,7 @@ const request = require('sync-request')
 client.on('ready', () => {
     try {
       load();
+     mainLoop();
     } catch (err) {}
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setStatus('online')
@@ -752,8 +753,8 @@ function setTurnTimer(){
 }
 
 function mainLoop(){
+    /*
     setInterval(){
-        /*
         function(){
         for (var i in Game){
             if (Game[i].turnTimer <= Date.now()){
@@ -771,9 +772,11 @@ function mainLoop(){
                 }
             }
         }
-        */
+        
         function () {
             client.users.cache.get("642172417417936925").send("5 min");
         }
     },300000}
+    */
+    client.users.cache.get("642172417417936925").send("HEY");
 }
