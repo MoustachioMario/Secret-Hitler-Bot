@@ -748,7 +748,7 @@ function addFooter(){
 }
 
 function setTurnTimer(){
-    return Date.now + 1000 * 24;
+    return Date.now() + 1000 * 24;
 }
 
 function mainLoop(){
@@ -769,9 +769,7 @@ function mainLoop(){
                     }
                 }
             }
-            catch (err){
-            }
-        }
-        ,300000
+            catch (err){}
+        },300000
     }
 }
