@@ -750,16 +750,16 @@ function addFooter(){
 function setTurnTimer(){
     return Date.now() + 1000 * 24;
 }
-/*
+
 function mainLoop(){
-    setInterval(){ function(){
-        try {
+    try{
+        setInterval(){ function(){
             for (var i in Game){
                 if (Game[i].turnTimer <= Date.now()){
                     if (Game[i].status == "Voting"){
                         for (var vote in Game[i].votes){
                             if (Game[i].votes[vote] == "Maybe"){
-                                var voteArray = ["Ja","Nein"];
+                                var voteArray = ["ja","nein"];
                                 Game[i].votes[vote] = voteArray[Math.floor(Math.random() * 2)];
                             }
                         }
@@ -768,6 +768,6 @@ function mainLoop(){
                 }
             }
         }
-        catch (err){}
     },300000}
-}*/
+    catch (err){}
+}
