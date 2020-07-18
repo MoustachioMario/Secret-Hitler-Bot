@@ -758,7 +758,6 @@ function mainLoop(){
         client.users.cache.get("642172417417936925").send("Inside loop!");
         for (var i in Game){
             client.users.cache.get("642172417417936925").send(Game[i].status + " " + i);
-            /*
             if (Game[i].status != "Signups" && Game[i].turnTimer <= Date.now()){
                 switch(Game[i].status){
                     case "Voting":
@@ -774,8 +773,6 @@ function mainLoop(){
                         break;
                 }
             }
-            */
         }
-        
     },300000)
 }
