@@ -756,6 +756,7 @@ function mainLoop(){
     client.users.cache.get("642172417417936925").send("Start of loop");
     setInterval(function(){ 
         client.users.cache.get("642172417417936925").send("Inside loop!");
+        /*
         for (var i in Game){
             if (Game[i].turnTimer <= Date.now()){
                 switch(Game[i].status){
@@ -773,6 +774,7 @@ function mainLoop(){
                 }
             }
         }
+        */
         
     },300000)
 }
