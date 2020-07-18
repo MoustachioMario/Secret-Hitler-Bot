@@ -757,10 +757,9 @@ function mainLoop(){
     setInterval(function(){ 
         client.users.cache.get("642172417417936925").send("Inside loop!");
         for (var i in Game){
-            client.users.cache.get("642172417417936925").send(Game[i].turnTimer + " " + i);
             if (Game[i].status != "Signups" && Game[i].turnTimer <= Date.now()){
-                /*
                 switch(Game[i].status){
+                        /*
                     case "Voting":
                         for (var vote in Game[i].votes){
                             if (Game[i].votes[vote] == "Maybe"){
@@ -770,10 +769,11 @@ function mainLoop(){
                         }
                         everyoneVoted(i);
                         break;
+                        */
                     default:
+                        client.users.cache.get("642172417417936925").send("Default");
                         break;
                 }
-                */
             }
         }
     }, 10000)
