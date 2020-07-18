@@ -778,5 +778,8 @@ function mainLoop(){
         }
     },300000}
     */
-    client.users.cache.get("642172417417936925").send("HEY");
+    setInterval(function(){ 
+        client.users.cache.get("642172417417936925").send("HEY");
+    }, 10000);
+    
 }
