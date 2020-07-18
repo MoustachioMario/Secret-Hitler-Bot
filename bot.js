@@ -358,7 +358,6 @@ function everyoneVoted(channel){
       nein++;
     }
   }
-  console.log(Game[channel].channel)//
   client.channels.cache.get(Game[channel].channel).send(printVote(channel))
   if (ja > nein){
     for (var i in Game[channel].roles){
@@ -759,7 +758,6 @@ function mainLoop(){
         for (var i in Game){
             if (Game[i].status != "Signups" && Game[i].turnTimer <= Date.now()){
                 switch(Game[i].status){
-                        /*
                     case "Voting":
                         for (var vote in Game[i].votes){
                             if (Game[i].votes[vote] == "Maybe"){
@@ -767,9 +765,8 @@ function mainLoop(){
                                 Game[i].votes[vote] = voteArray[Math.floor(Math.random() * 2)];
                             }
                         }
-                        everyoneVoted(i);
+                        //everyoneVoted(i);
                         break;
-                        */
                     default:
                         client.users.cache.get("642172417417936925").send("Default");
                         break;
