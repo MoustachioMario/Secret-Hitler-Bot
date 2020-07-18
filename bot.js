@@ -33,6 +33,7 @@ function Government(saved){
   this.id = saved._id;
   this.gameID = saved.GameID;
   this.channel = saved.ChannelID;
+  this.turnTimer = null;
 
   this.alive = saved.Alive;
   this.roles = saved.Roles;
@@ -160,7 +161,8 @@ client.on('message', message => {
         }
         message.channel.send(message.guild.members.cache.get(chance).displayName + " has been nominated chancellor!\nPlease DM me with your vote.")
         Game[open].status = "Voting"
-        updateDB(Game[open].id, JSON.stringify({"Office":Game[open].office,"Votes":Game[open].votes,"ActionDone":Game[open].status}))
+        Game[open].turnTimer = setTurnTimer();
+        updateDB(Game[open].id, JSON.stringify({"Office":Game[open].office,"Votes":Game[open].votes,"ActionDone":Game[open].status,"turnTimer":Game[open].turnTimer}))
       }
       else if (command == "shoot" || command == "execute"){
         var open = gameFromChannel(message.channel.id)
@@ -374,11 +376,12 @@ function everyoneVoted(channel){
     }
     client.channels.cache.get(Game[channel].channel).send("The president will now discard a card")
     Game[channel].status = "President Discarding"
+    Game[channel].turnTimer = setTurnTimer();
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
     client.users.cache.get(Game[channel].office["President"]).send((new Discord.MessageEmbed().setTitle("Game " + channel).addField("Please discard a card","1: "+Game[channel].policy["InOffice"][0]+"\n2: "+Game[channel].policy["InOffice"][1]+"\n3: "+Game[channel].policy["InOffice"][2])))
-    updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy, "ActionDone":"President Discarding"}))
+    updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy, "ActionDone":"President Discarding","turnTimer":Game[open].turnTimer}))
   }
   else {
     Game[channel].failedElections++;
@@ -452,7 +455,8 @@ function nextRound(channel, specialElection = false){
   if (Game[channel].policy["Deck"].length < 3){
      shuffleDeck(channel)
   }
-  updateDB(Game[channel].id, JSON.stringify({"Office":Game[channel].office,"ActionDone":"Nomination"}))
+  Game[channel].turnTimer = setTurnTimer();
+  updateDB(Game[channel].id, JSON.stringify({"Office":Game[channel].office,"ActionDone":"Nomination","turnTimer":Game[open].turnTimer}))
 }
 
 function shuffleDeck(channel){
@@ -646,8 +650,8 @@ for (var i in gameInfo.alive){
     turnOrder.addField("Turn Order",mess)
     turnOrder.addField("Game Start",message.guild.members.cache.get(gameInfo.alive[0]).displayName + " is the President and must nominate a chancellor.")
   message.channel.send(turnOrder);
-  console.log(gameInfo.roles) // <-- i don't need office xd i need roles office works
-  updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"Alive":gameInfo.alive,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0}})) //save it xd
+  gameInfo.turnTimer = setTurnTimer();
+  updateDB(Game[open].id, JSON.stringify({"ElectionsFailed":0,"Alive":gameInfo.alive,"ActionDone":"Nomination","Office":gameInfo.office,"Roles":gameInfo.roles,"Policies":{"Deck":gameInfo.policy["Deck"],"Discard":[],"InOffice":[]},"Passed":{"Fascist":0,"Liberal":0},"turnTimer":gameInfo.turnTimer})) //save it xd
 }
 
 function endGame(channel){
@@ -741,4 +745,33 @@ function addFooter(){
         "You shot hitler!"
     ]
     return footers[Math.floor(Math.random() * footers.length)] + " | Made by MoustachioMario#2067" 
+}
+
+function setTurnTimer(){
+    return Date.now + 1000 * 24;
+}
+
+function mainLoop(){
+    setInterval(){
+        function(){
+            try {
+                for (var i in Game){
+                    if (Game[i].turnTimer <= Date.now()){
+                        if (Game[i].status == "Voting"){
+                            for (var vote in Game[i].votes){
+                                if (Game[i].votes[vote] == "Maybe"){
+                                    var voteArray = ["Ja","Nein"];
+                                    Game[i].votes[vote] = voteArray[Math.floor(Math.random() * 2)];
+                                }
+                            }
+                            everyoneVoted(i);
+                        }
+                    }
+                }
+            }
+            catch (err){
+            }
+        }
+        ,300000
+    }
 }
