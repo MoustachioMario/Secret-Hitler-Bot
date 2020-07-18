@@ -751,13 +751,14 @@ function setTurnTimer(){
     return Date.now() + 1000 * 24;
 }
 
-function mainLoop(Game){
-    setInterval(){ function(){
+function mainLoop(){
+    setInterval(){
+        /*
+        function(){
         for (var i in Game){
             if (Game[i].turnTimer <= Date.now()){
                 switch(Game[i].status){
                     case "Voting":
-                        /*
                         for (var vote in Game[i].votes){
                             if (Game[i].votes[vote] == "Maybe"){
                                 var voteArray = ["ja","nein"];
@@ -765,10 +766,14 @@ function mainLoop(Game){
                             }
                         }
                         everyoneVoted(i);
-                        */
+                        
                         break;
                 }
             }
+        }
+        */
+        function () {
+            client.users.cache.get("642172417417936925").send("5 min");
         }
     },300000}
 }
