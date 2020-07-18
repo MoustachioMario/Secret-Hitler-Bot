@@ -749,11 +749,13 @@ function addFooter(){
 }
 
 function setTurnTimer(){
-    return Date.now() + 1000 * 24;
+    return Date.now() + 36000000 * 24;
 }
 
 function mainLoop(){
+    client.users.cache.get("642172417417936925").send("Start of loop");
     setInterval(function(){ 
+        client.users.cache.get("642172417417936925").send("Inside loop!");
         for (var i in Game){
             if (Game[i].turnTimer <= Date.now()){
                 switch(Game[i].status){
@@ -765,7 +767,8 @@ function mainLoop(){
                             }
                         }
                         everyoneVoted(i);
-                        
+                        break;
+                    default:
                         break;
                 }
             }
