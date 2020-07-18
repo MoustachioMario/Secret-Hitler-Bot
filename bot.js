@@ -34,7 +34,7 @@ function Government(saved){
   this.id = saved._id;
   this.gameID = saved.GameID;
   this.channel = saved.ChannelID;
-  this.turnTimer = null;
+  this.turnTimer = save.turnTimer;
 
   this.alive = saved.Alive;
   this.roles = saved.Roles;
