@@ -772,7 +772,7 @@ function mainLoop(){
                 }
             }
         }
-    }, 10000)
+    }, 300000)
     } catch (err){
         client.users.cache.get("642172417417936925").send("**ERROR IN MAINLOOP**: " + error.stack)
     }
