@@ -751,7 +751,7 @@ function setTurnTimer(){
     return Date.now() + 1000 * 24;
 }
 
-function mainLoop(){
+function mainLoop(Game){
     setInterval(){ function(){
         for (var i in Game){
             if (Game[i].turnTimer <= Date.now()){
