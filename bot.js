@@ -755,14 +755,18 @@ function mainLoop(){
     setInterval(){ function(){
         for (var i in Game){
             if (Game[i].turnTimer <= Date.now()){
-                if (Game[i].status == "Voting"){
-                    for (var vote in Game[i].votes){
-                        if (Game[i].votes[vote] == "Maybe"){
-                            var voteArray = ["ja","nein"];
-                            Game[i].votes[vote] = voteArray[Math.floor(Math.random() * 2)];
+                switch(Game[i].status){
+                    case "Voting":
+                        /*
+                        for (var vote in Game[i].votes){
+                            if (Game[i].votes[vote] == "Maybe"){
+                                var voteArray = ["ja","nein"];
+                                Game[i].votes[vote] = voteArray[Math.floor(Math.random() * 2)];
+                            }
                         }
-                    }
-                    everyoneVoted(i);
+                        everyoneVoted(i);
+                        */
+                        break;
                 }
             }
         }
