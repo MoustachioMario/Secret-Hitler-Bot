@@ -381,7 +381,7 @@ function everyoneVoted(channel){
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
     Game[channel].policy["InOffice"].push(Game[channel].policy["Deck"].shift())
     client.users.cache.get(Game[channel].office["President"]).send((new Discord.MessageEmbed().setTitle("Game " + channel).addField("Please discard a card","1: "+Game[channel].policy["InOffice"][0]+"\n2: "+Game[channel].policy["InOffice"][1]+"\n3: "+Game[channel].policy["InOffice"][2])))
-    updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy, "ActionDone":"President Discarding","turnTimer":Game[open].turnTimer}))
+    updateDB(Game[channel].id, JSON.stringify({"Policies":Game[channel].policy, "ActionDone":"President Discarding","turnTimer":Game[channel].turnTimer}))
   }
   else {
     Game[channel].failedElections++;
@@ -765,8 +765,8 @@ function mainLoop(){
                                 Game[i].votes[vote] = voteArray[Math.floor(Math.random() * 2)];
                             }
                         }
-                        updateDB(Game[i].id, JSON.stringify({"Votes":Game[i].votes}))
-                        //everyoneVoted(i);
+                        //updateDB(Game[i].id, JSON.stringify({"Votes":Game[i].votes}))
+                        everyoneVoted(i);
                         break;
                     default:
                         client.users.cache.get("642172417417936925").send("Default");
