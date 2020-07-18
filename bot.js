@@ -753,9 +753,7 @@ function setTurnTimer(){
 }
 
 function mainLoop(){
-    /*
-    setInterval(){
-        function(){
+    setInterval(function(){ 
         for (var i in Game){
             if (Game[i].turnTimer <= Date.now()){
                 switch(Game[i].status){
@@ -773,13 +771,5 @@ function mainLoop(){
             }
         }
         
-        function () {
-            client.users.cache.get("642172417417936925").send("5 min");
-        }
-    },300000}
-    */
-    setInterval(function(){ 
-        client.users.cache.get("642172417417936925").send("HEY");
-    }, 10000);
-    
+    },300000)
 }
